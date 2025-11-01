@@ -28,6 +28,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	compileOnly 'org.projectlombok:lombok:1.18.+'
 	annotationProcessor 'org.projectlombok:lombok:1.18.+'
+	implementation 'org.mindrot:jbcrypt:0.4'
 }
 
 tasks.named('test') {

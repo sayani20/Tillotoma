@@ -3,12 +3,20 @@ package com.web.tilotoma.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
 
 @Entity
-
+@Table(name = "role")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Role {
 
     @Id
@@ -23,54 +31,7 @@ public class Role {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdOn = LocalDateTime.now();
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(LocalDateTime createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public Role(Long id, String name, boolean isActive, LocalDateTime createdOn) {
-        this.id = id;
-        this.name = name;
-        this.isActive = isActive;
-        this.createdOn = createdOn;
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", isActive=" + isActive +
-                ", createdOn=" + createdOn +
-                '}';
-    }
 }
 
 

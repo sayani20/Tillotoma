@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/registration")
 public class SignUpController {
     @Autowired
     private SignUpServiceImpl signUpService;

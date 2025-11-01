@@ -30,6 +30,13 @@ public class SignUpServiceImpl implements SignUpService {
                 .toList();
     }
 
+    public Role createRole(Role role) {
+        if (roleRepo.existsByName(role.getName())) {
+            throw new RuntimeException("Role already exists with name: " + role.getName());
+        }
+        return roleRepo.save(role);
+    }
+
     @Override
     public List<User> getUsersByRoleId(Long roleId) {
         return userRepo.findByRole_Id(roleId);

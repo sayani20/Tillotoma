@@ -12,15 +12,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequestMapping("/api/user")
 public class SignUpController {
     @Autowired
     private SignUpServiceImpl signUpService;
+
     @GetMapping("/allRole")
     public ResponseEntity<ApiResponse<List<String>>> getAllRoles() {
-    List<String> roles = signUpService.getAllRoleNames();
-    return ResponseEntity.ok(new ApiResponse<>(true, "All Roles fetched", roles));
+        List<String> roles = signUpService.getAllRoleNames();
+        return ResponseEntity.ok(new ApiResponse<>(true, "All Roles fetched", roles));
+    }
+
+    @PostMapping("/createRole")
+    public ResponseEntity<?> createRole(@RequestBody Role role) {
+        try {
+            Role savedRole = signUpService.createRole(role);
+            return ResponseEntity.ok(Map.of(
+                    "status", true,
+                    "message", "Role created successfully",
+                    "data", savedRole
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", false,
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/role/{roleId}")
@@ -28,7 +48,8 @@ public class SignUpController {
         List<User> users = signUpService.getUsersByRoleId(roleId);
         return ResponseEntity.ok(new ApiResponse<>(true, "All users fetched for role ID: " + roleId, users));
     }
-    @PostMapping("/create")
+
+    @PostMapping("/createUser")
     public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserDto userDto) {
         User savedUser = signUpService.createUser(userDto);
         return ResponseEntity.ok(new ApiResponse<>(true, "User created successfully", savedUser));

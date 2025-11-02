@@ -67,6 +67,9 @@ public class SignUpServiceImpl implements SignUpService {
     public User login(LoginDto loginDto) {
         User user = userRepo.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email not found"));
+        if (user.getIsActive() == null || !user.getIsActive()) {
+            throw new RuntimeException("This is not a active user");
+        }
         boolean isPasswordMatch = PasswordUtil.checkPassword(loginDto.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
             throw new RuntimeException("Password not match");

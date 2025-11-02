@@ -4,16 +4,11 @@ package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.ContractorRequest;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourTypeRequest;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourAttendance;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.dto.ProjectDto;
+import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
-import com.web.tilotoma.repository.ContractorRepository;
-import com.web.tilotoma.repository.LabourAttendanceRepository;
-import com.web.tilotoma.repository.LabourRepository;
-import com.web.tilotoma.repository.LabourTypeRepository;
+import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,17 +31,34 @@ public class ContractorServiceImpl implements ContractorService {
 
     @Autowired
     private LabourAttendanceRepository attendanceRepository;
+    @Autowired
+    private ProjectRepo projectRepo;
 
     public Contractor addContractor(ContractorRequest req) {
+        //Contractor  create
         Contractor contractor = Contractor.builder()
                 .contractorName(req.getContractorName())
                 .username(req.getUserName())
                 .email(req.getEmail())
+                .address(req.getAddress())
                 .mobileNumber(req.getMobileNumber())
                 .isActive(true)
                 .build();
 
-        return contractorRepository.save(contractor);
+        // Contractor save
+        Contractor savedContractor = contractorRepository.save(contractor);
+
+        //  projectId assign
+        if (req.getProjectId() != null) {
+            Project project = projectRepo.findById(req.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + req.getProjectId()));
+
+            // contractor assign
+            project.setContractor(savedContractor);
+            projectRepo.save(project);
+        }
+
+        return savedContractor;
     }
 
     // Get All Contractors
@@ -141,4 +153,66 @@ public class ContractorServiceImpl implements ContractorService {
         }
         return attendanceRepository.findByLabourIdOrderByAttendanceDateDesc(labourId);
     }
+
+    public Project createProject(ProjectDto projectDto) {
+        Project project = Project.builder()
+                .name(projectDto.getName())
+                .description(projectDto.getDescription())
+                .location(projectDto.getLocation())
+                .city(projectDto.getCity())
+                .state(projectDto.getState())
+                .pincode(projectDto.getPincode())
+                .landArea(projectDto.getLandArea())
+                .builtUpArea(projectDto.getBuiltUpArea())
+                .startDate(projectDto.getStartDate())
+                .endDate(projectDto.getEndDate())
+                .possessionDate(projectDto.getPossessionDate())
+                .projectType(projectDto.getProjectType())
+                .projectStatus(projectDto.getProjectStatus())
+                .totalNumberOfFlats(projectDto.getTotalNumberOfFlats())
+                .totalNumberOfFloors(projectDto.getTotalNumberOfFloors())
+                .budgetEstimate(projectDto.getBudgetEstimate())
+                .remarks(projectDto.getRemarks())
+                .approvedByAuthority(projectDto.getApprovedByAuthority())
+                .approvalNumber(projectDto.getApprovalNumber())
+                .createdBy(projectDto.getCreatedBy())
+                .isActive(true)
+                .build();
+        if (projectDto.getContractorId() != null) {
+            Contractor contractor = contractorRepository.findById(projectDto.getContractorId())
+                    .orElseThrow(() -> new RuntimeException("Contractor not found"));
+            project.setContractor(contractor);
+        }
+
+        return projectRepo.save(project);
+    }
+
+    public List<Project> getAllProjects() {
+        return projectRepo.findAll();
+    }
+    public Contractor getContractorById(Long contractorId) {
+        return contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
+    }
+
+    public Contractor updateContractorDetails(Long contractorId, ContractorRequest request) {
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
+        contractor.setContractorName(request.getContractorName() != null ? request.getContractorName() : contractor.getContractorName());
+        contractor.setUsername(request.getUserName() != null ? request.getUserName() : contractor.getUsername());
+        contractor.setEmail(request.getEmail() != null ? request.getEmail() : contractor.getEmail());
+        contractor.setMobileNumber(request.getMobileNumber() != null ? request.getMobileNumber() : contractor.getMobileNumber());
+        contractor.setAddress(request.getAddress() != null ? request.getAddress() : contractor.getAddress());
+
+        return contractorRepository.save(contractor);
+    }
+    public void deleteContractorDetails(Long contractorId) {
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
+
+        contractorRepository.delete(contractor);
+    }
+
+
+
 }

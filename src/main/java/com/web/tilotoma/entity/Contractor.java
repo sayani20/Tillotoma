@@ -30,6 +30,8 @@ public class Contractor {
 
     @Column(length = 15)
     private String mobileNumber;
+    @Column(length = 50)
+    private String address;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
@@ -48,11 +50,7 @@ public class Contractor {
     @JsonManagedReference
     private List<Labour> labours;
 
-    @ManyToMany
-    @JoinTable(
-            name = "contractor_projects",
-            joinColumns = @JoinColumn(name = "contractor_id"),
-            inverseJoinColumns = @JoinColumn(name = "project_id")
-    )
+    @OneToMany(mappedBy = "contractor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Project> projects;
 }

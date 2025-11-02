@@ -1,13 +1,7 @@
 package com.web.tilotoma.controller;
 
-import com.web.tilotoma.dto.ApiResponse;
-import com.web.tilotoma.dto.ContractorRequest;
-import com.web.tilotoma.dto.LabourRequest;
-import com.web.tilotoma.dto.LabourTypeRequest;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourAttendance;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.dto.*;
+import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,9 +64,9 @@ public class ContractorController {
 
     //contractorId wise labour
     @GetMapping("/contractorIdWiseLabour/{contractorId}")
-    public ResponseEntity<List<Labour>> getLaboursByContractor(@PathVariable Long contractorId) {
+    public ResponseEntity<ApiResponse<List<Labour>>> getLaboursByContractor(@PathVariable Long contractorId) {
         List<Labour> labours = contractorService.getLaboursByContractor(contractorId);
-        return ResponseEntity.ok(labours);
+        return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched for contractor ID: " + contractorId, labours));
     }
 
     //labour login logout api
@@ -112,5 +106,49 @@ public class ContractorController {
             ));
         }
     }
+
+
+    @PostMapping("/createProject")
+    public ResponseEntity<ApiResponse<Project>> createProject(@RequestBody ProjectDto projectDto) {
+        Project project = contractorService.createProject(projectDto);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Project created successfully",
+                project
+        ));
+    }
+
+    @GetMapping("/getAllProjects")
+    public ResponseEntity<ApiResponse<List<Project>>> getAllProjects() {
+        List<Project> projects = contractorService.getAllProjects();
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "All projects fetched successfully",
+                projects
+        ));
+    }
+    @GetMapping("/contractorDetails/{contractorId}")
+    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable Long contractorId) {
+        Contractor contractor = contractorService.getContractorById(contractorId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
+    }
+
+    @PutMapping("/contractorDetails/update/{contractorId}")
+    public ResponseEntity<ApiResponse<Contractor>> updateContractor(
+            @PathVariable Long contractorId,
+            @RequestBody ContractorRequest contractorRequest) {
+
+        Contractor updatedContractor = contractorService.updateContractorDetails(contractorId, contractorRequest);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details updated successfully", updatedContractor));
+    }
+
+    @DeleteMapping("/contractorDetails/delete/{contractorId}")
+    public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable Long contractorId) {
+        contractorService.deleteContractorDetails(contractorId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
+    }
+
+
+
 
 }

@@ -66,14 +66,14 @@ public class SignUpServiceImpl implements SignUpService {
     public User login(LoginDto loginDto) {
         User user = userRepo.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email not found"));
-
-        // ✅ Password match check
         boolean isPasswordMatch = PasswordUtil.checkPassword(loginDto.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
             throw new RuntimeException("Password not match");
         }
-
-        return user; // ✅ Login success
+        if (!user.getRole().getId().equals(loginDto.getRoleid())) {
+            throw new RuntimeException("Role not match for this user");
+        }
+        return user;
     }
 }
 

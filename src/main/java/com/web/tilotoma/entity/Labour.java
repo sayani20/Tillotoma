@@ -1,5 +1,7 @@
 package com.web.tilotoma.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Labour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +34,7 @@ public class Labour {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contractor_id", nullable = false)
+    @JsonBackReference
     private Contractor contractor;
 
     @Column(name = "is_active")

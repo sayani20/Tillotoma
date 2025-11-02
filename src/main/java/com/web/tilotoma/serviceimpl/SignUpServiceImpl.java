@@ -1,6 +1,7 @@
 package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.LoginDto;
+import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
 import com.web.tilotoma.entity.Role;
 import com.web.tilotoma.entity.User;
@@ -22,11 +23,11 @@ public class SignUpServiceImpl implements SignUpService {
     @Autowired
     private UserRepo userRepo;
     @Override
-    public List<String> getAllRoleNames() {
+    public List<RoleDto> getAllRoleNames() {
         return roleRepo.findAll()
                 .stream()
                 .filter(Role::isActive)
-                .map(Role::getName)
+                .map(role -> new RoleDto(role.getId(), role.getName()))
                 .toList();
     }
 

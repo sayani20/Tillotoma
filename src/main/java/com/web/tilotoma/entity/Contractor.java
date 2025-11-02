@@ -1,4 +1,6 @@
 package com.web.tilotoma.entity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Contractor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +45,6 @@ public class Contractor {
     private List<ContractorLabourRate> labourRates;
 
     @OneToMany(mappedBy = "contractor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Labour> labours;
 }

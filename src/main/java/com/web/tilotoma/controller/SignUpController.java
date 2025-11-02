@@ -2,6 +2,7 @@ package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.LoginDto;
+import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
 import com.web.tilotoma.entity.Role;
 import com.web.tilotoma.entity.User;
@@ -21,8 +22,8 @@ public class SignUpController {
     private SignUpServiceImpl signUpService;
 
     @GetMapping("/allRole")
-    public ResponseEntity<ApiResponse<List<String>>> getAllRoles() {
-        List<String> roles = signUpService.getAllRoleNames();
+    public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
+        List<RoleDto> roles = signUpService.getAllRoleNames();
         return ResponseEntity.ok(new ApiResponse<>(true, "All Roles fetched", roles));
     }
 

@@ -69,7 +69,7 @@ public class ContractorController {
     }
 
     //contractorId wise labour
-    @GetMapping("/contractor/{contractorId}")
+    @GetMapping("/contractorIdWiseLabour/{contractorId}")
     public ResponseEntity<List<Labour>> getLaboursByContractor(@PathVariable Long contractorId) {
         List<Labour> labours = contractorService.getLaboursByContractor(contractorId);
         return ResponseEntity.ok(labours);

@@ -4,6 +4,7 @@ import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.Role;
 import com.web.tilotoma.entity.User;
 import com.web.tilotoma.exceptions.CustomException;
+import com.web.tilotoma.repository.UserRepo;
 import com.web.tilotoma.serviceimpl.SignUpServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import java.util.Map;
 public class SignUpController {
     @Autowired
     private SignUpServiceImpl signUpService;
+    @Autowired
+    private UserRepo userRepo;
+
 
     @GetMapping("/allRole")
     public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
@@ -73,6 +77,12 @@ public class SignUpController {
                 : "User deactivated successfully";
 
         return ResponseEntity.ok(new ApiResponse<>(true, message, updatedUser));
+    }
+
+    @GetMapping("/getAllTypeUsers")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepo.findAll();
+        return ResponseEntity.ok(users);
     }
 }
 

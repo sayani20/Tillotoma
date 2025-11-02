@@ -1,9 +1,6 @@
 package com.web.tilotoma.controller;
 
-import com.web.tilotoma.dto.ApiResponse;
-import com.web.tilotoma.dto.ContractorRequest;
-import com.web.tilotoma.dto.LabourRequest;
-import com.web.tilotoma.dto.LabourTypeRequest;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourAttendance;
@@ -33,10 +30,14 @@ public class ContractorController {
 
     //getAllContractors
     @GetMapping("/getAllContractors")
-    public ResponseEntity<ApiResponse<List<Contractor>>> getAllContractors() {
-        List<Contractor> contractors = contractorService.getAllContractors();
+    public ResponseEntity<ApiResponse<List<ContractorResponse>>> getAllContractors() {
+        List<ContractorResponse> contractors = contractorService.getAllContractorsCustom();
         return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched", contractors));
     }
+   /* public ResponseEntity<ApiResponse<List<Contractor>>> getAllContractors() {
+        List<Contractor> contractors = contractorService.getAllContractorsCustom();
+        return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched", contractors));
+    }*/
 
     //contractorId wise labour add
     @PostMapping("/labour/addLabour")

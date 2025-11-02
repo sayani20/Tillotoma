@@ -1,9 +1,6 @@
 package com.web.tilotoma.controller;
 
-import com.web.tilotoma.dto.ApiResponse;
-import com.web.tilotoma.dto.LoginDto;
-import com.web.tilotoma.dto.RoleDto;
-import com.web.tilotoma.dto.UserDto;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.Role;
 import com.web.tilotoma.entity.User;
 import com.web.tilotoma.exceptions.CustomException;
@@ -67,5 +64,17 @@ public class SignUpController {
         }
     }
 
+    @PostMapping("/updateUserStatus")
+    public ResponseEntity<ApiResponse<User>> updateUserStatus(@RequestBody UserStatusUpdateRequest request) {
+        User updatedUser = signUpService.updateUserStatus(request.getUserId(), request.getIsActive(), request.getRemarks());
 
+        String message = request.getIsActive()
+                ? "User activated successfully"
+                : "User deactivated successfully";
+
+        return ResponseEntity.ok(new ApiResponse<>(true, message, updatedUser));
+    }
 }
+
+
+

@@ -1,6 +1,7 @@
 package com.web.tilotoma.service;
 
 import com.web.tilotoma.dto.ContractorRequest;
+import com.web.tilotoma.dto.ContractorResponse;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourTypeRequest;
 import com.web.tilotoma.entity.Contractor;
@@ -29,7 +30,7 @@ public interface ContractorService {
 
     // Get All Contractors
     public List<Contractor> getAllContractors();
-
+    public List<ContractorResponse> getAllContractorsCustom();
     // Add Labour Under Contractor
     public Labour addLabourUnderContractor(Long contractorId, LabourRequest req);
     // Get All Labours

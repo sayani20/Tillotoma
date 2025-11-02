@@ -5,6 +5,7 @@ import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
 import com.web.tilotoma.entity.Role;
 import com.web.tilotoma.entity.User;
+import com.web.tilotoma.exceptions.ResourceNotFoundException;
 import com.web.tilotoma.repository.RoleRepo;
 import com.web.tilotoma.repository.UserRepo;
 import com.web.tilotoma.service.SignUpService;
@@ -74,6 +75,16 @@ public class SignUpServiceImpl implements SignUpService {
             throw new RuntimeException("Role not match for this user");
         }
         return user;
+    }
+
+    @Override
+    public User updateUserStatus(Long userId, Boolean isActive, String remarks) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        user.setIsActive(isActive);
+        user.setLastUpdateRemarks(remarks);
+        return userRepo.save(user);
     }
 }
 

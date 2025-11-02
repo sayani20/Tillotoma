@@ -2,6 +2,7 @@ package com.web.tilotoma.serviceimpl;
 
 
 import com.web.tilotoma.dto.ContractorRequest;
+import com.web.tilotoma.dto.ContractorResponse;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourTypeRequest;
 import com.web.tilotoma.dto.ProjectDto;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ContractorServiceImpl implements ContractorService {
@@ -65,6 +67,37 @@ public class ContractorServiceImpl implements ContractorService {
     public List<Contractor> getAllContractors() {
         return contractorRepository.findAll();
     }
+
+
+    public List<ContractorResponse> getAllContractorsCustom() {
+        List<Contractor> contractors = contractorRepository.findAll();
+
+        return contractors.stream().map(contractor -> {
+            long labourCount = contractor.getLabours() != null ? contractor.getLabours().size() : 0;
+
+            long labourTypeCount = 0;
+            if (contractor.getLabours() != null && !contractor.getLabours().isEmpty()) {
+                labourTypeCount = contractor.getLabours().stream()
+                        .filter(l -> l.getLabourType() != null)
+                        .map(l -> l.getLabourType().getTypeName())
+                        .distinct()
+                        .count();
+            }
+
+            return ContractorResponse.builder()
+                    .id(contractor.getId())
+                    .contractorName(contractor.getContractorName())
+                    .username(contractor.getUsername())
+                    .email(contractor.getEmail())
+                    .mobileNumber(contractor.getMobileNumber())
+                    .isActive(contractor.getIsActive())
+                    .createdOn(contractor.getCreatedOn())
+                    .labourCount(labourCount)
+                    .labourTypeCount(labourTypeCount)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
 
     // Add Labour Under Contractor
     public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {

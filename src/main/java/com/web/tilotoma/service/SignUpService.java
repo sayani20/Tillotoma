@@ -13,4 +13,6 @@ public interface SignUpService {
     public List<User> getUsersByRoleId(Long roleId);
     public User createUser(UserDto userDto);
     User login(LoginDto loginDto);
+    public User updateUserStatus(Long userId, Boolean isActive, String remarks);
+
 }

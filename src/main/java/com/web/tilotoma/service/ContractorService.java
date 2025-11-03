@@ -4,10 +4,8 @@ import com.web.tilotoma.dto.ContractorRequest;
 import com.web.tilotoma.dto.ContractorResponse;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourTypeRequest;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourAttendance;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.dto.ProjectDto;
+import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
 import com.web.tilotoma.repository.ContractorRepository;
@@ -47,4 +45,11 @@ public interface ContractorService {
     public LabourAttendance markAttendance(Long labourId) ;
 
     public List<LabourAttendance> getAttendanceByLabour(Long labourId);
+    public Project createProject(ProjectDto projectDto);
+    public List<Project> getAllProjects() ;
+    public Contractor getContractorById(Long contractorId);
+    public Contractor updateContractorDetails(Long contractorId, ContractorRequest request);
+    public void deleteContractorDetails(Long contractorId);
+
+
 }

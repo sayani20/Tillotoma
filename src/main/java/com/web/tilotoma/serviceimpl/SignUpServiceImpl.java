@@ -13,41 +13,64 @@ import com.web.tilotoma.utill.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {
-@Autowired
+
+    @Autowired
     private RoleRepo roleRepo;
     @Autowired
     private UserRepo userRepo;
+
     @Override
     public List<RoleDto> getAllRoleNames() {
-        return roleRepo.findAll()
-                .stream()
+        List<Role> roles = roleRepo.findAll();
+        if (roles.isEmpty()) {
+            throw new RuntimeException("No roles found in the system.");
+        }
+        return roles.stream()
                 .filter(Role::isActive)
                 .map(role -> new RoleDto(role.getId(), role.getName()))
                 .toList();
     }
 
+    @Override
     public Role createRole(Role role) {
         if (roleRepo.existsByName(role.getName())) {
             throw new RuntimeException("Role already exists with name: " + role.getName());
+        }
+        if (role.getName() == null || role.getName().isBlank()) {
+            throw new RuntimeException("Role name cannot be empty.");
         }
         return roleRepo.save(role);
     }
 
     @Override
     public List<User> getUsersByRoleId(Long roleId) {
-        return userRepo.findByRole_Id(roleId);
+        if (!roleRepo.existsById(roleId)) {
+            throw new RuntimeException("Invalid Role ID: " + roleId);
+        }
+        List<User> users = userRepo.findByRole_Id(roleId);
+        if (users.isEmpty()) {
+            throw new RuntimeException("No users found for this role ID.");
+        }
+        return users;
     }
 
     @Override
     public User createUser(UserDto userDto) {
+        if (userRepo.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new RuntimeException("User already exists with email: " + userDto.getEmail());
+        }
+
         Role role = roleRepo.findById(userDto.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + userDto.getRoleId()));
+
+        if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
+            throw new RuntimeException("Password cannot be empty.");
+        }
+
         User user = User.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
@@ -60,23 +83,26 @@ public class SignUpServiceImpl implements SignUpService {
                 .isActive(true)
                 .build();
         return userRepo.save(user);
-
     }
 
     @Override
     public User login(LoginDto loginDto) {
         User user = userRepo.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email not found"));
+                .orElseThrow(() -> new RuntimeException("No account found with email: " + loginDto.getEmail()));
+
         if (user.getIsActive() == null || !user.getIsActive()) {
-            throw new RuntimeException("This is not a active user");
+            throw new RuntimeException("This user account is deactivated. Please contact admin.");
         }
+
         boolean isPasswordMatch = PasswordUtil.checkPassword(loginDto.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
-            throw new RuntimeException("Password not match");
+            throw new RuntimeException("Incorrect password.");
         }
+
         if (!user.getRole().getId().equals(loginDto.getRoleid())) {
-            throw new RuntimeException("Role not match for this user");
+            throw new RuntimeException("Selected role does not match the user’s assigned role.");
         }
+
         return user;
     }
 
@@ -86,9 +112,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         user.setIsActive(isActive);
-        user.setLastUpdateRemarks(remarks);
+        user.setLastUpdateRemarks(remarks != null ? remarks : "");
         return userRepo.save(user);
     }
 }
-
-

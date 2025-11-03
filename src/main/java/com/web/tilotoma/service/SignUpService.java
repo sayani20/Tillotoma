@@ -14,5 +14,5 @@ public interface SignUpService {
     public User createUser(UserDto userDto);
     User login(LoginDto loginDto);
     public User updateUserStatus(Long userId, Boolean isActive, String remarks);
-
+    Role createRole(Role role);
 }

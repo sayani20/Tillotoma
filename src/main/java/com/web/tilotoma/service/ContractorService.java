@@ -28,7 +28,7 @@ public interface ContractorService {
     // Add Labour Under Contractor
     public Labour addLabourUnderContractor(Long contractorId, LabourRequest req);
     // Get All Labours
-    public List<Labour> getAllLabours();
+    public List<LabourResponse> getAllLabours();
 
     // Get All Labour Types
     public List<LabourType> getAllLabourTypes();

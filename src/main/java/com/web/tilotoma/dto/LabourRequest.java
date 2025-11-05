@@ -5,6 +5,7 @@ import java.util.List;
 
 @Data
 public class LabourRequest {
+    private Long id;
     private Long contractorId;
     private String labourName;
     private String email;

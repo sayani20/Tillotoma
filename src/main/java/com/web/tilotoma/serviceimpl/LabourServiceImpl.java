@@ -22,6 +22,8 @@ public class LabourServiceImpl implements LabourService {
     ContractorRepository contractorRepository;
     LabourTypeRepository labourTypeRepository;
     ProjectRepo projectRepo;
+
+
     public Labour getLabourById(Long id) {
         return labourRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Labour not found with id: " + id));

@@ -24,9 +24,9 @@ public class LabourController {
     }
 
     @PutMapping("/updateLabourDetails")
-    public ResponseEntity<?> updateLabour(@RequestParam Long id, @RequestBody LabourRequest labourRequest) {
+    public ResponseEntity<?> updateLabour( @RequestBody LabourRequest labourRequest) {
         try {
-            Labour updatedLabour = labourService.updateLabour(id, labourRequest);
+            Labour updatedLabour = labourService.updateLabour(labourRequest.getId(), labourRequest);
             return ResponseEntity.ok(updatedLabour);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

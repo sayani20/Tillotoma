@@ -54,8 +54,8 @@ public class ContractorController {
 
     //getAllLabours
     @GetMapping("/labour/getAllLabours")
-    public ResponseEntity<ApiResponse<List<Labour>>> getAllLabours() {
-        List<Labour> labours = contractorService.getAllLabours();
+    public ResponseEntity<ApiResponse<List<LabourResponse>>> getAllLabours() {
+        List<LabourResponse> labours = contractorService.getAllLabours();
         return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched", labours));
     }
 

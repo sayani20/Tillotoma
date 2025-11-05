@@ -130,8 +130,27 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     // Get All Labours
-    public List<Labour> getAllLabours() {
+   /* public List<Labour> getAllLabours() {
         return labourRepository.findAll();
+    }*/
+    public List<LabourResponse> getAllLabours() {
+        List<Labour> labours = labourRepository.findAll();
+
+        return labours.stream().map(labour -> LabourResponse.builder()
+                .id(labour.getId())
+                .labourName(labour.getLabourName())
+                .email(labour.getEmail())
+                .mobileNumber(labour.getMobileNumber())
+                .contractorId(labour.getContractor() != null ? labour.getContractor().getId() : null)
+                .contractorName(labour.getContractor() != null ? labour.getContractor().getContractorName() : null)
+                .labourTypeId(labour.getLabourType() != null ? labour.getLabourType().getId() : null)
+                .labourTypeName(labour.getLabourType() != null ? labour.getLabourType().getTypeName() : null)
+                /*.projectIds(labour.getProjects() != null ?
+                        labour.getProjects().stream().map(Project::getId).toList() : null)
+                .projectNames(labour.getProjects() != null ?
+                        labour.getProjects().stream().map(Project::g).toList() : null)*/
+                .build()
+        ).toList();
     }
 
     // Get All Labour Types
@@ -234,6 +253,7 @@ public class ContractorServiceImpl implements ContractorService {
     public List<Project> getAllProjects() {
         return projectRepo.findAll();
     }
+
     public Contractor getContractorById(Long contractorId) {
         return contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
@@ -250,13 +270,13 @@ public class ContractorServiceImpl implements ContractorService {
 
         return contractorRepository.save(contractor);
     }
+
     public void deleteContractorDetails(Long contractorId) {
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
 
         contractorRepository.delete(contractor);
     }
-
 
 
     //--------------------------Report Start-----------------------//
@@ -309,9 +329,6 @@ public class ContractorServiceImpl implements ContractorService {
         return reportList;
     }
     //--------------------------Report END-----------------------//
-
-
-
 
 
 }

@@ -14,4 +14,5 @@ public interface  LabourRepository extends JpaRepository<Labour, Long> {
     List<Labour> findByLabourType(LabourType labourType);
     List<Labour> findByIsActiveTrue();
     List<Labour> findByContractorId(Long contractorId);
+
 }

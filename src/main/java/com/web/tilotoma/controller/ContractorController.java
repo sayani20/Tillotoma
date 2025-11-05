@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +80,7 @@ public class ContractorController {
         return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched for contractor ID: " + contractorId, labours));
     }
 
-    //labour login logout api
+
     @PostMapping("/{labourId}/mark")
     public ResponseEntity<?> markAttendance(@PathVariable Long labourId) {
         try {
@@ -157,6 +158,31 @@ public class ContractorController {
         contractorService.deleteContractorDetails(contractorId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
     }
+
+
+    @PostMapping("/attendance-report")
+    public ResponseEntity<?> getContractorAttendanceReport(@RequestBody ContractorAttendanceReportRequest request) {
+        try {
+            List<ContractorAttendanceReportDto> report =
+                    contractorService.getContractorAttendanceReport(request.getContractorId(), request.getDate());
+
+            return ResponseEntity.ok(Map.of(
+                    "status", true,
+                    "message", report.isEmpty()
+                            ? "No attendance records found for this date"
+                            : "Attendance report fetched successfully",
+                    "data", report
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+
+
 
 
 

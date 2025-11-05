@@ -2,6 +2,7 @@ package com.web.tilotoma.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -45,6 +46,7 @@ public class Labour {
     private LocalDateTime createdOn;
 
     @OneToMany(mappedBy = "labour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<LabourAttendance> attendanceRecords;
 
     @ManyToMany

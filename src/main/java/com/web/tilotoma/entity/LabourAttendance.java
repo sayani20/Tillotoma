@@ -1,4 +1,5 @@
 package com.web.tilotoma.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ public class LabourAttendance {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "labour_id", nullable = false)
+    @JsonBackReference
     private Labour labour;
 
     @Column(nullable = false)

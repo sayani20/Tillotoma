@@ -1,11 +1,7 @@
 package com.web.tilotoma.serviceimpl;
 
 
-import com.web.tilotoma.dto.ContractorRequest;
-import com.web.tilotoma.dto.ContractorResponse;
-import com.web.tilotoma.dto.LabourRequest;
-import com.web.tilotoma.dto.LabourTypeRequest;
-import com.web.tilotoma.dto.ProjectDto;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
@@ -260,6 +256,61 @@ public class ContractorServiceImpl implements ContractorService {
 
         contractorRepository.delete(contractor);
     }
+
+
+
+    //--------------------------Report Start-----------------------//
+    public List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date) {
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        List<Labour> labours = labourRepository.findByContractorId(contractorId);
+
+        List<ContractorAttendanceReportDto> reportList = new ArrayList<>();
+
+        for (Labour labour : labours) {
+            Optional<LabourAttendance> attendanceOpt =
+                    attendanceRepository.findByLabourIdAndAttendanceDate(labour.getId(), date);
+
+            if (attendanceOpt.isEmpty()) continue; // skip if no attendance that day
+
+            LabourAttendance attendance = attendanceOpt.get();
+
+            ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
+                    .labourId(labour.getId())
+                    .labourName(labour.getLabourName())
+                    .labourType(
+                            ContractorAttendanceReportDto.LabourTypeDto.builder()
+                                    .id(labour.getLabourType().getId())
+                                    .typeName(labour.getLabourType().getTypeName())
+                                    .build()
+                    )
+                    .projects(
+                            labour.getProjects().stream()
+                                    .map(p -> ContractorAttendanceReportDto.ProjectDto.builder()
+                                            .id(p.getId())
+                                            .name(p.getName())
+                                            .build())
+                                    .toList()
+                    )
+                    .attendance(
+                            ContractorAttendanceReportDto.AttendanceDto.builder()
+                                    .attendanceDate(attendance.getAttendanceDate())
+                                    .inTime(attendance.getInTime())
+                                    .outTime(attendance.getOutTime())
+                                    .isPresent(attendance.getIsPresent())
+                                    .build()
+                    )
+                    .build();
+
+            reportList.add(dto);
+        }
+
+        return reportList;
+    }
+    //--------------------------Report END-----------------------//
+
+
 
 
 

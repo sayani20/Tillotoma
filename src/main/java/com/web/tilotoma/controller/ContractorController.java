@@ -139,7 +139,7 @@ public class ContractorController {
         ));
     }
     @GetMapping("/contractorDetails/{contractorId}")
-    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable Long contractorId) {
+    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable("contractorId") Long contractorId) {
         Contractor contractor = contractorService.getContractorById(contractorId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
     }

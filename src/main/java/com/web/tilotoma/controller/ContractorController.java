@@ -154,11 +154,10 @@ public class ContractorController {
     }
 
     @DeleteMapping("/contractorDetails/delete/{contractorId}")
-    public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable Long contractorId) {
+    public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable("contractorId") Long contractorId) {
         contractorService.deleteContractorDetails(contractorId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
     }
-
 
     @PostMapping("/attendance-report")
     public ResponseEntity<?> getContractorAttendanceReport(@RequestBody ContractorAttendanceReportRequest request) {

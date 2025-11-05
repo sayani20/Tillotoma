@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class ContractorServiceImpl implements ContractorService {
     private ProjectRepo projectRepo;
 
     public Contractor addContractor(ContractorRequest req) {
-        //Contractor  create
+        // 1️⃣ Contractor create
         Contractor contractor = Contractor.builder()
                 .contractorName(req.getContractorName())
                 .username(req.getUserName())
@@ -47,17 +48,24 @@ public class ContractorServiceImpl implements ContractorService {
                 .isActive(true)
                 .build();
 
-        // Contractor save
+        // 2️⃣ Contractor save
         Contractor savedContractor = contractorRepository.save(contractor);
 
-        //  projectId assign
-        if (req.getProjectId() != null) {
-            Project project = projectRepo.findById(req.getProjectId())
-                    .orElseThrow(() -> new RuntimeException("Project not found with ID: " + req.getProjectId()));
+        // 3️⃣ Multiple Project assign (if provided)
+        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
+            List<Project> projects = projectRepo.findAllById(req.getProjectIds());
 
-            // contractor assign
-            project.setContractor(savedContractor);
-            projectRepo.save(project);
+            if (projects.isEmpty()) {
+                throw new RuntimeException("No projects found for given IDs: " + req.getProjectIds());
+            }
+
+            // প্রতিটা project এ contractor assign করো
+            for (Project project : projects) {
+                project.setContractor(savedContractor);
+            }
+
+            // একবারে সব project save করো
+            projectRepo.saveAll(projects);
         }
 
         return savedContractor;
@@ -107,12 +115,19 @@ public class ContractorServiceImpl implements ContractorService {
         LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Labour type not found"));
 
+        // Projects fetch
+        List<Project> projects = new ArrayList<>();
+        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
+            projects = projectRepo.findAllById(req.getProjectIds());
+        }
+
         Labour labour = Labour.builder()
                 .labourName(req.getLabourName())
                 .email(req.getEmail())
                 .mobileNumber(req.getMobileNumber())
                 .labourType(labourType)
                 .contractor(contractor)
+                .projects(projects)
                 .build();
 
         return labourRepository.save(labour);

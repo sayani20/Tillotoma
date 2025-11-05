@@ -46,4 +46,12 @@ public class Labour {
 
     @OneToMany(mappedBy = "labour", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LabourAttendance> attendanceRecords;
+
+    @ManyToMany
+    @JoinTable(
+            name = "labour_projects",
+            joinColumns = @JoinColumn(name = "labour_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id")
+    )
+    private List<Project> projects;
 }

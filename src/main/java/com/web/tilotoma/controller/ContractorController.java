@@ -163,12 +163,16 @@ public class ContractorController {
     public ResponseEntity<?> getContractorAttendanceReport(@RequestBody ContractorAttendanceReportRequest request) {
         try {
             List<ContractorAttendanceReportDto> report =
-                    contractorService.getContractorAttendanceReport(request.getContractorId(), request.getDate());
+                    contractorService.getContractorAttendanceReportBetweenDates(
+                            request.getContractorId(),
+                            request.getStartDate(),
+                            request.getEndDate()
+                    );
 
             return ResponseEntity.ok(Map.of(
                     "status", true,
                     "message", report.isEmpty()
-                            ? "No attendance records found for this date"
+                            ? "No attendance records found in this date range"
                             : "Attendance report fetched successfully",
                     "data", report
             ));
@@ -179,11 +183,4 @@ public class ContractorController {
             ));
         }
     }
-
-
-
-
-
-
-
 }

@@ -260,50 +260,50 @@ public class ContractorServiceImpl implements ContractorService {
 
 
     //--------------------------Report Start-----------------------//
-    public List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date) {
+    public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate) {
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
 
         List<Labour> labours = labourRepository.findByContractorId(contractorId);
-
         List<ContractorAttendanceReportDto> reportList = new ArrayList<>();
 
         for (Labour labour : labours) {
-            Optional<LabourAttendance> attendanceOpt =
-                    attendanceRepository.findByLabourIdAndAttendanceDate(labour.getId(), date);
+            List<LabourAttendance> attendances =
+                    attendanceRepository.findByLabourIdAndAttendanceDateBetween(
+                            labour.getId(), startDate, endDate);
 
-            if (attendanceOpt.isEmpty()) continue; // skip if no attendance that day
+            if (attendances.isEmpty()) continue;
 
-            LabourAttendance attendance = attendanceOpt.get();
+            for (LabourAttendance attendance : attendances) {
+                ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
+                        .labourId(labour.getId())
+                        .labourName(labour.getLabourName())
+                        .labourType(
+                                ContractorAttendanceReportDto.LabourTypeDto.builder()
+                                        .id(labour.getLabourType().getId())
+                                        .typeName(labour.getLabourType().getTypeName())
+                                        .build()
+                        )
+                        .projects(
+                                labour.getProjects().stream()
+                                        .map(p -> ContractorAttendanceReportDto.ProjectDto.builder()
+                                                .id(p.getId())
+                                                .name(p.getName())
+                                                .build())
+                                        .toList()
+                        )
+                        .attendance(
+                                ContractorAttendanceReportDto.AttendanceDto.builder()
+                                        .attendanceDate(attendance.getAttendanceDate())
+                                        .inTime(attendance.getInTime())
+                                        .outTime(attendance.getOutTime())
+                                        .isPresent(attendance.getIsPresent())
+                                        .build()
+                        )
+                        .build();
 
-            ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
-                    .labourId(labour.getId())
-                    .labourName(labour.getLabourName())
-                    .labourType(
-                            ContractorAttendanceReportDto.LabourTypeDto.builder()
-                                    .id(labour.getLabourType().getId())
-                                    .typeName(labour.getLabourType().getTypeName())
-                                    .build()
-                    )
-                    .projects(
-                            labour.getProjects().stream()
-                                    .map(p -> ContractorAttendanceReportDto.ProjectDto.builder()
-                                            .id(p.getId())
-                                            .name(p.getName())
-                                            .build())
-                                    .toList()
-                    )
-                    .attendance(
-                            ContractorAttendanceReportDto.AttendanceDto.builder()
-                                    .attendanceDate(attendance.getAttendanceDate())
-                                    .inTime(attendance.getInTime())
-                                    .outTime(attendance.getOutTime())
-                                    .isPresent(attendance.getIsPresent())
-                                    .build()
-                    )
-                    .build();
-
-            reportList.add(dto);
+                reportList.add(dto);
+            }
         }
 
         return reportList;

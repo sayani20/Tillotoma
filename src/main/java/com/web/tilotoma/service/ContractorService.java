@@ -47,6 +47,6 @@ public interface ContractorService {
     public Contractor updateContractorDetails(Long contractorId, ContractorRequest request);
     public void deleteContractorDetails(Long contractorId);
 
-    List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date);
-
+    //List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date);
+    List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate);
 }

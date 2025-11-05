@@ -15,5 +15,5 @@ public interface LabourAttendanceRepository extends JpaRepository<LabourAttendan
     List<LabourAttendance> findByLabourAndAttendanceDate(Labour labour, LocalDate date);
     Optional<LabourAttendance> findByLabourIdAndAttendanceDate(Long labourId, LocalDate attendanceDate);
     List<LabourAttendance> findByLabourIdOrderByAttendanceDateDesc(Long labourId);
-
+    List<LabourAttendance> findByLabourIdAndAttendanceDateBetween(Long labourId, LocalDate startDate, LocalDate endDate);
 }

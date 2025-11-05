@@ -7,5 +7,6 @@ import java.time.LocalDate;
 @Data
 public class ContractorAttendanceReportRequest {
     private Long contractorId;
-    private LocalDate date;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

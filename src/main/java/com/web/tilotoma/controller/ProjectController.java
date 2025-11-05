@@ -1,17 +1,44 @@
 package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.ApiResponse;
+import com.web.tilotoma.dto.ProjectDto;
 import com.web.tilotoma.entity.Project;
 import com.web.tilotoma.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
     @Autowired
     ProjectService projectService;
+
+
+
+    @PostMapping("/createProject")
+    public ResponseEntity<ApiResponse<Project>> createProject(@RequestBody ProjectDto projectDto) {
+        Project project = projectService.createProject(projectDto);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Project created successfully",
+                project
+        ));
+    }
+
+    @GetMapping("/getAllProjects")
+    public ResponseEntity<ApiResponse<List<Project>>> getAllProjects() {
+        List<Project> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "All projects fetched successfully",
+                projects
+        ));
+    }
+
+
     @GetMapping("/idWiseProjectDetails")
     public ResponseEntity<ApiResponse<?>> getProjectById(@RequestParam("id") Long id) {
         try {

@@ -1,17 +1,26 @@
 package com.web.tilotoma.serviceimpl;
 
+import com.web.tilotoma.dto.ProjectDto;
+import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.repository.ContractorRepository;
 import com.web.tilotoma.repository.ProjectRepo;
 import com.web.tilotoma.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
     @Autowired
     ProjectRepo projectRepo;
+
+    @Autowired
+    private ContractorRepository contractorRepository;
+
+
     @Override
     public Project getProjectById(Long id) {
             return projectRepo.findById(id)
@@ -57,5 +66,45 @@ public class ProjectServiceImpl implements ProjectService {
 
         projectRepo.deleteById(id);
         return "Project deleted successfully with id: " + id;
+    }
+
+
+    // Create Project
+    public Project createProject(ProjectDto projectDto) {
+        Project project = Project.builder()
+                .name(projectDto.getName())
+                .description(projectDto.getDescription())
+                .location(projectDto.getLocation())
+                .city(projectDto.getCity())
+                .state(projectDto.getState())
+                .pincode(projectDto.getPincode())
+                .landArea(projectDto.getLandArea())
+                .builtUpArea(projectDto.getBuiltUpArea())
+                .startDate(projectDto.getStartDate())
+                .endDate(projectDto.getEndDate())
+                .possessionDate(projectDto.getPossessionDate())
+                .projectType(projectDto.getProjectType())
+                .projectStatus(projectDto.getProjectStatus())
+                .totalNumberOfFlats(projectDto.getTotalNumberOfFlats())
+                .totalNumberOfFloors(projectDto.getTotalNumberOfFloors())
+                .budgetEstimate(projectDto.getBudgetEstimate())
+                .remarks(projectDto.getRemarks())
+                .approvedByAuthority(projectDto.getApprovedByAuthority())
+                .approvalNumber(projectDto.getApprovalNumber())
+                .createdBy(projectDto.getCreatedBy())
+                .isActive(true)
+                .build();
+        if (projectDto.getContractorId() != null) {
+            Contractor contractor = contractorRepository.findById(projectDto.getContractorId())
+                    .orElseThrow(() -> new RuntimeException("Contractor not found"));
+            project.setContractor(contractor);
+        }
+
+        return projectRepo.save(project);
+    }
+
+    // get all project
+    public List<Project> getAllProjects() {
+        return projectRepo.findAll();
     }
 }

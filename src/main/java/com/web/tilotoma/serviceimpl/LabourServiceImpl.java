@@ -1,10 +1,13 @@
 package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.LabourRequest;
+import com.web.tilotoma.dto.LabourResponse;
+import com.web.tilotoma.dto.LabourTypeRequest;
 import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourType;
 import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.exceptions.ResourceNotFoundException;
 import com.web.tilotoma.repository.ContractorRepository;
 import com.web.tilotoma.repository.LabourRepository;
 import com.web.tilotoma.repository.LabourTypeRepository;
@@ -13,16 +16,71 @@ import com.web.tilotoma.service.LabourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LabourServiceImpl implements LabourService {
     @Autowired
     LabourRepository labourRepo;
+    @Autowired
     ContractorRepository contractorRepository;
+    @Autowired
     LabourTypeRepository labourTypeRepository;
+    @Autowired
     ProjectRepo projectRepo;
 
+    // Add Labour Under Contractor
+    public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contractor not found"));
+
+        LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Labour type not found"));
+
+        // Projects fetch
+        List<Project> projects = new ArrayList<>();
+        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
+            projects = projectRepo.findAllById(req.getProjectIds());
+        }
+
+        Labour labour = Labour.builder()
+                .labourName(req.getLabourName())
+                .email(req.getEmail())
+                .mobileNumber(req.getMobileNumber())
+                .labourType(labourType)
+                .contractor(contractor)
+                .projects(projects)
+                .build();
+
+        return labourRepository.save(labour);
+    }
+
+    // Get All Labours
+    public List<LabourResponse> getAllLabours() {
+        List<Labour> labours = labourRepo.findAll();
+
+        return labours.stream().map(labour -> LabourResponse.builder()
+                .id(labour.getId())
+                .labourName(labour.getLabourName())
+                .email(labour.getEmail())
+                .mobileNumber(labour.getMobileNumber())
+                .contractorId(labour.getContractor() != null ? labour.getContractor().getId() : null)
+                .contractorName(labour.getContractor() != null ? labour.getContractor().getContractorName() : null)
+                .labourTypeId(labour.getLabourType() != null ? labour.getLabourType().getId() : null)
+                .labourTypeName(labour.getLabourType() != null ? labour.getLabourType().getTypeName() : null)
+                .build()
+        ).toList();
+    }
+
+    //contractorId wise Labour
+    public List<Labour> getLaboursByContractor(Long contractorId) {
+        // optional: check contractor exists or not
+        contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        return labourRepo.findByContractorId(contractorId);
+    }
 
     public Labour getLabourById(Long id) {
         return labourRepo.findById(id)
@@ -55,10 +113,28 @@ public class LabourServiceImpl implements LabourService {
 
         return labourRepo.save(existing);
     }
+
+
     public String deleteLabour(Long id) {
         Labour existing = getLabourById(id);
         labourRepo.delete(existing);
         return "Labour deleted successfully with ID: " + id;
+    }
+
+    // Get All Labour Types
+    public List<LabourType> getAllLabourTypes() {
+        return labourTypeRepository.findAll();
+    }
+
+    // Add Labour Type
+    public LabourType addLabourType(LabourTypeRequest req) {
+        LabourType labourType = LabourType.builder()
+                .typeName(req.getTypeName())
+                //.dailyRate(req.getDailyRate())
+                //.hourlyRate(req.getHourlyRate())
+                .build();
+
+        return labourTypeRepository.save(labourType);
     }
 
     }

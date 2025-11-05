@@ -38,49 +38,33 @@ public class ContractorController {
         List<ContractorResponse> contractors = contractorService.getAllContractorsCustom();
         return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched", contractors));
     }
-   /* public ResponseEntity<ApiResponse<List<Contractor>>> getAllContractors() {
-        List<Contractor> contractors = contractorService.getAllContractorsCustom();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched", contractors));
-    }*/
 
-    //contractorId wise labour add
-    @PostMapping("/labour/addLabour")
-    public ResponseEntity<ApiResponse<Labour>> addLabourUnderContractor(
-            @RequestBody LabourRequest request) {
-
-        Labour labour = contractorService.addLabourUnderContractor(request.getContractorId(), request);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Labour added successfully", labour));
+    //contractorId wise details
+    @GetMapping("/contractorDetails/{contractorId}")
+    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable("contractorId") Long contractorId) {
+        Contractor contractor = contractorService.getContractorById(contractorId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
     }
 
-    //getAllLabours
-    @GetMapping("/labour/getAllLabours")
-    public ResponseEntity<ApiResponse<List<LabourResponse>>> getAllLabours() {
-        List<LabourResponse> labours = contractorService.getAllLabours();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched", labours));
+    //contractorId wise details update
+    @PutMapping("/contractorDetails/update/{contractorId}")
+    public ResponseEntity<ApiResponse<Contractor>> updateContractor(
+            @PathVariable Long contractorId,
+            @RequestBody ContractorRequest contractorRequest) {
+
+        Contractor updatedContractor = contractorService.updateContractorDetails(contractorId, contractorRequest);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details updated successfully", updatedContractor));
     }
 
-    //getAllLabourTypes
-    @GetMapping("/labourType/getAllLabourTypes")
-    public ResponseEntity<ApiResponse<List<LabourType>>> getAllLabourTypes() {
-        List<LabourType> types = contractorService.getAllLabourTypes();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labour types fetched", types));
-    }
-
-    //addLabourType
-    @PostMapping("/labourType/addLabourType")
-    public ResponseEntity<ApiResponse<LabourType>> addLabourType(@RequestBody LabourTypeRequest request) {
-        LabourType type = contractorService.addLabourType(request);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Labour type added successfully", type));
-    }
-
-    //contractorId wise labour
-    @GetMapping("/contractorIdWiseLabour/{contractorId}")
-    public ResponseEntity<ApiResponse<List<Labour>>> getLaboursByContractor(@PathVariable Long contractorId) {
-        List<Labour> labours = contractorService.getLaboursByContractor(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched for contractor ID: " + contractorId, labours));
+    //contractorId wise delete contractor
+    @DeleteMapping("/contractorDetails/delete/{contractorId}")
+    public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable("contractorId") Long contractorId) {
+        contractorService.deleteContractorDetails(contractorId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
     }
 
 
+    //mark attendance
     @PostMapping("/{labourId}/mark")
     public ResponseEntity<?> markAttendance(@PathVariable Long labourId) {
         try {
@@ -118,47 +102,7 @@ public class ContractorController {
         }
     }
 
-
-    @PostMapping("/createProject")
-    public ResponseEntity<ApiResponse<Project>> createProject(@RequestBody ProjectDto projectDto) {
-        Project project = contractorService.createProject(projectDto);
-        return ResponseEntity.ok(new ApiResponse<>(
-                true,
-                "Project created successfully",
-                project
-        ));
-    }
-
-    @GetMapping("/getAllProjects")
-    public ResponseEntity<ApiResponse<List<Project>>> getAllProjects() {
-        List<Project> projects = contractorService.getAllProjects();
-        return ResponseEntity.ok(new ApiResponse<>(
-                true,
-                "All projects fetched successfully",
-                projects
-        ));
-    }
-    @GetMapping("/contractorDetails/{contractorId}")
-    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable("contractorId") Long contractorId) {
-        Contractor contractor = contractorService.getContractorById(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
-    }
-
-    @PutMapping("/contractorDetails/update/{contractorId}")
-    public ResponseEntity<ApiResponse<Contractor>> updateContractor(
-            @PathVariable Long contractorId,
-            @RequestBody ContractorRequest contractorRequest) {
-
-        Contractor updatedContractor = contractorService.updateContractorDetails(contractorId, contractorRequest);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details updated successfully", updatedContractor));
-    }
-
-    @DeleteMapping("/contractorDetails/delete/{contractorId}")
-    public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable("contractorId") Long contractorId) {
-        contractorService.deleteContractorDetails(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
-    }
-
+    //proper attendance report
     @PostMapping("/attendance-report")
     public ResponseEntity<?> getContractorAttendanceReport(@RequestBody ContractorAttendanceReportRequest request) {
         try {

@@ -3,6 +3,7 @@ package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourResponse;
 import com.web.tilotoma.dto.LabourTypeRequest;
+import com.web.tilotoma.dto.response.LabourResponseDto;
 import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourType;
@@ -53,7 +54,7 @@ public class LabourServiceImpl implements LabourService {
                 .projects(projects)
                 .build();
 
-        return labourRepository.save(labour);
+        return labourRepo.save(labour);
     }
 
     // Get All Labours
@@ -74,13 +75,40 @@ public class LabourServiceImpl implements LabourService {
     }
 
     //contractorId wise Labour
-    public List<Labour> getLaboursByContractor(Long contractorId) {
-        // optional: check contractor exists or not
-        contractorRepository.findById(contractorId)
+    public List<LabourResponseDto> getLaboursByContractor(Long contractorId) {
+        Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
 
-        return labourRepo.findByContractorId(contractorId);
+        List<Labour> labours = labourRepo.findByContractorId(contractorId);
+
+        return labours.stream().map(labour -> LabourResponseDto.builder()
+                .id(labour.getId())
+                .labourName(labour.getLabourName())
+                .email(labour.getEmail())
+                .mobileNumber(labour.getMobileNumber())
+                .isActive(labour.getIsActive())
+                .createdOn(labour.getCreatedOn())
+
+                .contractorId(contractor.getId())
+                .contractorName(contractor.getContractorName())
+
+                .labourTypeId(labour.getLabourType().getId())
+                .labourTypeName(labour.getLabourType().getTypeName())
+
+                .projects(
+                        labour.getProjects() != null
+                                ? labour.getProjects().stream()
+                                .map(p -> LabourResponseDto.ProjectDto.builder()
+                                        .id(p.getId())
+                                        .name(p.getName())
+                                        .build())
+                                .toList()
+                                : null
+                )
+                .build()
+        ).toList();
     }
+
 
     public Labour getLabourById(Long id) {
         return labourRepo.findById(id)

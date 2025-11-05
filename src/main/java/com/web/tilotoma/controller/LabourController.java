@@ -1,9 +1,7 @@
 package com.web.tilotoma.controller;
 
-import com.web.tilotoma.dto.ApiResponse;
-import com.web.tilotoma.dto.LabourRequest;
-import com.web.tilotoma.dto.LabourResponse;
-import com.web.tilotoma.dto.LabourTypeRequest;
+import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.response.LabourResponseDto;
 import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourType;
 import com.web.tilotoma.service.LabourService;
@@ -15,77 +13,125 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/labour")
+@CrossOrigin(origins = "*")
 public class LabourController {
 
     @Autowired
     private LabourService labourService;
 
-
-    //contractorId wise labour add
+    // ✅ Add Labour under Contractor
     @PostMapping("/labour/addLabour")
-    public ResponseEntity<ApiResponse<Labour>> addLabourUnderContractor(
-            @RequestBody LabourRequest request) {
-
-        Labour labour = labourService.addLabourUnderContractor(request.getContractorId(), request);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Labour added successfully", labour));
+    public ResponseEntity<ApiResponse<Labour>> addLabourUnderContractor(@RequestBody LabourRequest request) {
+        try {
+            Labour labour = labourService.addLabourUnderContractor(request.getContractorId(), request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Labour added successfully", labour));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to add labour", null));
+        }
     }
 
+    // ✅ Get Labour Details by ID
     @GetMapping("/IdWiseLabourDetails")
-    public ResponseEntity<?> getLabourDetails(@RequestParam Long id) {
+    public ResponseEntity<ApiResponse<Labour>> getLabourDetails(@RequestParam Long id) {
         try {
             Labour labour = labourService.getLabourById(id);
-            return ResponseEntity.ok(labour);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Labour details fetched successfully", labour));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch labour details", null));
         }
     }
 
+    // ✅ Update Labour Details
     @PutMapping("/updateLabourDetails")
-    public ResponseEntity<?> updateLabour( @RequestBody LabourRequest labourRequest) {
+    public ResponseEntity<ApiResponse<Labour>> updateLabour(@RequestBody LabourRequest labourRequest) {
         try {
             Labour updatedLabour = labourService.updateLabour(labourRequest.getId(), labourRequest);
-            return ResponseEntity.ok(updatedLabour);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Labour details updated successfully", updatedLabour));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to update labour details", null));
         }
     }
 
+    // ✅ Delete Labour by ID
     @DeleteMapping("/deleteLabour")
-    public ResponseEntity<?> deleteLabour(@RequestParam Long id) {
+    public ResponseEntity<ApiResponse<String>> deleteLabour(@RequestParam Long id) {
         try {
             String message = labourService.deleteLabour(id);
-            return ResponseEntity.ok(message);
+            return ResponseEntity.ok(new ApiResponse<>(true, message, null));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to delete labour", null));
         }
     }
 
-    //getAllLabours
+    // ✅ Get All Labours
     @GetMapping("/labour/getAllLabours")
     public ResponseEntity<ApiResponse<List<LabourResponse>>> getAllLabours() {
-        List<LabourResponse> labours = labourService.getAllLabours();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched", labours));
+        try {
+            List<LabourResponse> labours = labourService.getAllLabours();
+            return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched successfully", labours));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch labours", null));
+        }
     }
 
-    //contractorId wise labour
+    // ✅ Get Labours by Contractor ID
     @GetMapping("/contractorIdWiseLabour/{contractorId}")
-    public ResponseEntity<ApiResponse<List<Labour>>> getLaboursByContractor(@PathVariable Long contractorId) {
-        List<Labour> labours = labourService.getLaboursByContractor(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labours fetched for contractor ID: " + contractorId, labours));
+    public ResponseEntity<ApiResponse<List<LabourResponseDto>>> getLaboursByContractor(@PathVariable Long contractorId) {
+        try {
+            List<LabourResponseDto> labours = labourService.getLaboursByContractor(contractorId);
+            return ResponseEntity.ok(new ApiResponse<>(
+                    true,
+                    "All labours fetched for contractor ID: " + contractorId,
+                    labours
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch labours for contractor", null));
+        }
     }
 
-    //getAllLabourTypes
+    // ✅ Get All Labour Types
     @GetMapping("/labourType/getAllLabourTypes")
     public ResponseEntity<ApiResponse<List<LabourType>>> getAllLabourTypes() {
-        List<LabourType> types = labourService.getAllLabourTypes();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All labour types fetched", types));
+        try {
+            List<LabourType> types = labourService.getAllLabourTypes();
+            return ResponseEntity.ok(new ApiResponse<>(true, "All labour types fetched successfully", types));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch labour types", null));
+        }
     }
 
-    //addLabourType
+    // ✅ Add Labour Type
     @PostMapping("/labourType/addLabourType")
     public ResponseEntity<ApiResponse<LabourType>> addLabourType(@RequestBody LabourTypeRequest request) {
-        LabourType type = labourService.addLabourType(request);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Labour type added successfully", type));
+        try {
+            LabourType type = labourService.addLabourType(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Labour type added successfully", type));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to add labour type", null));
+        }
     }
-
 }

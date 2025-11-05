@@ -1,6 +1,7 @@
 package com.web.tilotoma.service;
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
@@ -35,7 +36,7 @@ public interface ContractorService {
 
     public List<LabourAttendance> getAttendanceByLabour(Long labourId);
 
-    public Contractor getContractorById(Long contractorId);
+    public ContractorDetailsDto getContractorById(Long contractorId);
     public Contractor updateContractorDetails(Long contractorId, ContractorRequest request);
     public void deleteContractorDetails(Long contractorId);
 

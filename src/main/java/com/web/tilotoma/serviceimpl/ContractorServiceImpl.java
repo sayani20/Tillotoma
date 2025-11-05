@@ -2,6 +2,7 @@ package com.web.tilotoma.serviceimpl;
 
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.*;
 
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
@@ -101,9 +102,34 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     //get contractor details by id
-    public Contractor getContractorById(Long contractorId) {
-        return contractorRepository.findById(contractorId)
+    public ContractorDetailsDto getContractorById(Long contractorId) {
+        Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
+
+        return ContractorDetailsDto.builder()
+                .id(contractor.getId())
+                .contractorName(contractor.getContractorName())
+                .username(contractor.getUsername())
+                .email(contractor.getEmail())
+                .mobileNumber(contractor.getMobileNumber())
+                .address(contractor.getAddress())
+                .isActive(contractor.getIsActive())
+                .createdOn(contractor.getCreatedOn())
+                .labours(contractor.getLabours() != null
+                        ? contractor.getLabours().stream()
+                        .map(l -> ContractorDetailsDto.LabourDto.builder()
+                                .id(l.getId())
+                                .labourName(l.getLabourName())
+                                .email(l.getEmail())
+                                .mobileNumber(l.getMobileNumber())
+                                .labourTypeId(l.getLabourType().getId())
+                                .labourTypeName(l.getLabourType().getTypeName())
+                                .isActive(l.getIsActive())
+                                .createdOn(l.getCreatedOn())
+                                .build())
+                        .toList()
+                        : null)
+                .build();
     }
 
     //contractorId wise details update

@@ -1,21 +1,14 @@
 package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourAttendance;
-import com.web.tilotoma.entity.LabourType;
-import com.web.tilotoma.dto.*;
-import com.web.tilotoma.entity.*;
-
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/contractor")
@@ -25,86 +18,117 @@ public class ContractorController {
     @Autowired
     private ContractorService contractorService;
 
-    //addContractor
+    // ✅ Add Contractor
     @PostMapping("/addContractor")
     public ResponseEntity<ApiResponse<Contractor>> addContractor(@RequestBody ContractorRequest request) {
-        Contractor contractor = contractorService.addContractor(request);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor added successfully", contractor));
+        try {
+            Contractor contractor = contractorService.addContractor(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Contractor added successfully", contractor));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to add contractor", null));
+        }
     }
 
-    //getAllContractors
+    // ✅ Get All Contractors
     @GetMapping("/getAllContractors")
     public ResponseEntity<ApiResponse<List<ContractorResponse>>> getAllContractors() {
-        List<ContractorResponse> contractors = contractorService.getAllContractorsCustom();
-        return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched", contractors));
+        try {
+            List<ContractorResponse> contractors = contractorService.getAllContractorsCustom();
+            return ResponseEntity.ok(new ApiResponse<>(true, "All contractors fetched successfully", contractors));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch contractors", null));
+        }
     }
 
-    //contractorId wise details
+    // ✅ Get Contractor Details by ID
     @GetMapping("/contractorDetails/{contractorId}")
-    public ResponseEntity<ApiResponse<Contractor>> getContractorById(@PathVariable("contractorId") Long contractorId) {
-        Contractor contractor = contractorService.getContractorById(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
+    public ResponseEntity<ApiResponse<ContractorDetailsDto>> getContractorById(
+            @PathVariable("contractorId") Long contractorId) {
+        try {
+            ContractorDetailsDto contractor = contractorService.getContractorById(contractorId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details fetched successfully", contractor));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch contractor details", null));
+        }
     }
 
-    //contractorId wise details update
+    // ✅ Update Contractor by ID
     @PutMapping("/contractorDetails/update/{contractorId}")
     public ResponseEntity<ApiResponse<Contractor>> updateContractor(
             @PathVariable Long contractorId,
             @RequestBody ContractorRequest contractorRequest) {
-
-        Contractor updatedContractor = contractorService.updateContractorDetails(contractorId, contractorRequest);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details updated successfully", updatedContractor));
+        try {
+            Contractor updatedContractor = contractorService.updateContractorDetails(contractorId, contractorRequest);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Contractor details updated successfully", updatedContractor));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to update contractor details", null));
+        }
     }
 
-    //contractorId wise delete contractor
+    // ✅ Delete Contractor by ID
     @DeleteMapping("/contractorDetails/delete/{contractorId}")
     public ResponseEntity<ApiResponse<String>> deleteContractor(@PathVariable("contractorId") Long contractorId) {
-        contractorService.deleteContractorDetails(contractorId);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Contractor Details deleted successfully", null));
+        try {
+            contractorService.deleteContractorDetails(contractorId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Contractor deleted successfully", null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to delete contractor", null));
+        }
     }
 
-
-    //mark attendance
+    // ✅ Mark Attendance
     @PostMapping("/{labourId}/mark")
-    public ResponseEntity<?> markAttendance(@PathVariable Long labourId) {
+    public ResponseEntity<ApiResponse<LabourAttendance>> markAttendance(@PathVariable Long labourId) {
         try {
             LabourAttendance attendance = contractorService.markAttendance(labourId);
-            return ResponseEntity.ok(Map.of(
-                    "status", true,
-                    "message", attendance.getOutTime() == null
-                            ? "In-time marked successfully"
-                            : "Out-time marked successfully",
-                    "data", attendance
-            ));
+            String message = (attendance.getOutTime() == null)
+                    ? "In-time marked successfully"
+                    : "Out-time marked successfully";
+            return ResponseEntity.ok(new ApiResponse<>(true, message, attendance));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "status", false,
-                    "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to mark attendance", null));
         }
     }
 
-    //labourId wise attendance
+    // ✅ Get Attendance by Labour ID
     @GetMapping("/{labourId}/report")
-    public ResponseEntity<?> getAttendanceReport(@PathVariable Long labourId) {
+    public ResponseEntity<ApiResponse<List<LabourAttendance>>> getAttendanceReport(@PathVariable Long labourId) {
         try {
             List<LabourAttendance> records = contractorService.getAttendanceByLabour(labourId);
-            return ResponseEntity.ok(Map.of(
-                    "status", true,
-                    "message", records.isEmpty() ? "No attendance records found" : "Attendance records fetched successfully",
-                    "data", records
-            ));
+            String message = records.isEmpty()
+                    ? "No attendance records found"
+                    : "Attendance records fetched successfully";
+            return ResponseEntity.ok(new ApiResponse<>(true, message, records));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "status", false,
-                    "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch attendance report", null));
         }
     }
 
-    //proper attendance report
+    // ✅ Contractor Attendance Report Between Dates
     @PostMapping("/attendance-report")
-    public ResponseEntity<?> getContractorAttendanceReport(@RequestBody ContractorAttendanceReportRequest request) {
+    public ResponseEntity<ApiResponse<List<ContractorAttendanceReportDto>>> getContractorAttendanceReport(
+            @RequestBody ContractorAttendanceReportRequest request) {
         try {
             List<ContractorAttendanceReportDto> report =
                     contractorService.getContractorAttendanceReportBetweenDates(
@@ -113,18 +137,16 @@ public class ContractorController {
                             request.getEndDate()
                     );
 
-            return ResponseEntity.ok(Map.of(
-                    "status", true,
-                    "message", report.isEmpty()
-                            ? "No attendance records found in this date range"
-                            : "Attendance report fetched successfully",
-                    "data", report
-            ));
+            String message = report.isEmpty()
+                    ? "No attendance records found in this date range"
+                    : "Attendance report fetched successfully";
+
+            return ResponseEntity.ok(new ApiResponse<>(true, message, report));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "status", false,
-                    "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch contractor attendance report", null));
         }
     }
 }

@@ -32,7 +32,7 @@ public class LabourServiceImpl implements LabourService {
     ProjectRepo projectRepo;
 
     // Add Labour Under Contractor
-    public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
+   /* public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contractor not found"));
 
@@ -52,6 +52,28 @@ public class LabourServiceImpl implements LabourService {
                 .labourType(labourType)
                 .contractor(contractor)
                 .projects(projects)
+                .build();
+
+        return labourRepo.save(labour);
+    }*/
+    public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
+        Contractor contractor = contractorRepository.findById(req.getContractorId())
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+        LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
+                .orElseThrow(() -> new RuntimeException("Labour type not found"));
+
+        double ratePerDay = req.getRatePerDay() != null ? req.getRatePerDay() : 0.0;
+        double ratePerHour = ratePerDay > 0 ? ratePerDay / 8.0 : 0.0;
+
+        Labour labour = Labour.builder()
+                .labourName(req.getLabourName())
+                .email(req.getEmail())
+                .mobileNumber(req.getMobileNumber())
+                .contractor(contractor)
+                .labourType(labourType)
+                .ratePerDay(ratePerDay)
+                .ratePerHour(ratePerHour)
+                .isActive(true)
                 .build();
 
         return labourRepo.save(labour);
@@ -139,8 +161,17 @@ public class LabourServiceImpl implements LabourService {
             existing.setProjects(projects);
         }
 
+        // ✅ ratePerDay and ratePerHour calculation
+        if (labourRequest.getRatePerDay() != null) {
+            double ratePerDay = labourRequest.getRatePerDay();
+            double ratePerHour = ratePerDay / 8.0;
+            existing.setRatePerDay(ratePerDay);
+            existing.setRatePerHour(ratePerHour);
+        }
+
         return labourRepo.save(existing);
     }
+
 
 
     public String deleteLabour(Long id) {
@@ -165,4 +196,4 @@ public class LabourServiceImpl implements LabourService {
         return labourTypeRepository.save(labourType);
     }
 
-    }
+}

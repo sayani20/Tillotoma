@@ -56,4 +56,10 @@ public class Labour {
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     private List<Project> projects;
+
+    @Column(name = "rate_per_hour")
+    private Double ratePerHour;
+
+    @Column(name = "rate_per_day")
+    private Double ratePerDay;
 }

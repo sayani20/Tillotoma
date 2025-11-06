@@ -39,16 +39,16 @@ public class Project {
     private LocalDateTime possessionDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private ProjectType projectType; // STAND_ALONE or APARTMENT
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String projectStatus; // ONGOING, COMPLETED, UPCOMING
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer totalNumberOfFlats;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer totalNumberOfFloors;
 
     private Double budgetEstimate;

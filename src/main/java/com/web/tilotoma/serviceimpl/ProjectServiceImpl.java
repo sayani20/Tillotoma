@@ -94,6 +94,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .createdBy(projectDto.getCreatedBy())
                 .isActive(true)
                 .build();
+
         if (projectDto.getContractorId() != null) {
             Contractor contractor = contractorRepository.findById(projectDto.getContractorId())
                     .orElseThrow(() -> new RuntimeException("Contractor not found"));
@@ -102,6 +103,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         return projectRepo.save(project);
     }
+
 
     // get all project
     public List<Project> getAllProjects() {

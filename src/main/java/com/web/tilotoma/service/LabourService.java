@@ -1,5 +1,6 @@
 package com.web.tilotoma.service;
 
+import com.web.tilotoma.dto.LabourMonthlyReportDto;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourResponse;
 import com.web.tilotoma.dto.LabourTypeRequest;
@@ -26,4 +27,6 @@ public interface LabourService {
 
     // Add Labour Type
     public LabourType addLabourType(LabourTypeRequest req) ;
+
+    public List<LabourMonthlyReportDto> getMonthlyReport(Long contractorId, int year, int month);
 }

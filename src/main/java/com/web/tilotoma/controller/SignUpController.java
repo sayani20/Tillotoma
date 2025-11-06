@@ -150,4 +150,47 @@ public class SignUpController {
             ));
         }
     }
+    @GetMapping("userDetails/{userId}")
+    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long userId) {
+        try {
+            User user = signUpService.getUserById(userId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "User details fetched successfully", user));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to fetch user details", null));
+        }
+    }
+
+    // 🟡 Update User
+    @PutMapping("updateUserDetails/{userId}")
+    public ResponseEntity<ApiResponse<User>> updateUser(
+            @PathVariable Long userId,
+            @RequestBody User updatedUser
+    ) {
+        try {
+            User user = signUpService.updateUser(userId, updatedUser);
+            return ResponseEntity.ok(new ApiResponse<>(true, "User updated successfully", user));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponse<>(false, "Failed to update user", null));
+        }
+    }
+
+    // 🔴 Delete User
+    @DeleteMapping("deleteUser/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long userId) {
+        try {
+            signUpService.deleteUser(userId);
+            return ResponseEntity.ok(new ApiResponse<>(true, "User deleted successfully", null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponse<>(false, "Failed to delete user", null));
+        }
+    }
+
 }

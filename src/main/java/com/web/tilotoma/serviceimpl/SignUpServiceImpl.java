@@ -1,5 +1,6 @@
 package com.web.tilotoma.serviceimpl;
 
+import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.LoginDto;
 import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {
@@ -114,5 +116,34 @@ public class SignUpServiceImpl implements SignUpService {
         user.setIsActive(isActive);
         user.setLastUpdateRemarks(remarks != null ? remarks : "");
         return userRepo.save(user);
+    }
+
+    public User getUserById(Long userId) {
+        return userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    }
+
+    public User updateUser(Long userId, User updatedUser) {
+        User existingUser = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Update only non-null fields
+        if (updatedUser.getName() != null) existingUser.setName(updatedUser.getName());
+        if (updatedUser.getEmail() != null) existingUser.setEmail(updatedUser.getEmail());
+        if (updatedUser.getMobileNumber() != null) existingUser.setMobileNumber(updatedUser.getMobileNumber());
+        if (updatedUser.getAadharNumber() != null) existingUser.setAadharNumber(updatedUser.getAadharNumber());
+        if (updatedUser.getRole() != null) existingUser.setRole(updatedUser.getRole());
+        if (updatedUser.getPassword() != null) existingUser.setPassword(updatedUser.getPassword());
+        if (updatedUser.getIsActive() != null) existingUser.setIsActive(updatedUser.getIsActive());
+        if (updatedUser.getLastUpdateRemarks() != null)
+            existingUser.setLastUpdateRemarks(updatedUser.getLastUpdateRemarks());
+
+        return userRepo.save(existingUser);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        userRepo.delete(user);
     }
 }

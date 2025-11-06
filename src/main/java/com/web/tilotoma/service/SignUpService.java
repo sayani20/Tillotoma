@@ -1,5 +1,6 @@
 package com.web.tilotoma.service;
 
+import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.LoginDto;
 import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
@@ -15,4 +16,7 @@ public interface SignUpService {
     User login(LoginDto loginDto);
     public User updateUserStatus(Long userId, Boolean isActive, String remarks);
     Role createRole(Role role);
+    User getUserById(Long userId);
+    User updateUser(Long userId, User updatedUser);
+    void deleteUser(Long userId);
 }

@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ public class ContractorServiceImpl implements ContractorService {
     private LabourAttendanceRepository attendanceRepository;
     @Autowired
     private ProjectRepo projectRepo;
+    @Autowired
+    ContractorLabourRateRepository contractorLabourRateRepository;
 
 
 
@@ -151,6 +155,73 @@ public class ContractorServiceImpl implements ContractorService {
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
 
         contractorRepository.delete(contractor);
+    }
+
+    public List<ContractorProjectMonthlyReportDto> getMonthlyProjectReport(Long contractorId, int year, int month) {
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // All labours under contractor
+        List<Labour> labours = labourRepository.findByContractor(contractor);
+
+        // Group by project
+        Map<String, List<Labour>> projectGroups = labours.stream()
+                .filter(l -> l.getProjects() != null)
+                .flatMap(l -> l.getProjects().stream().map(p -> Map.entry(p.getName(), l)))
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+
+        List<ContractorProjectMonthlyReportDto> reports = new ArrayList<>();
+
+        for (Map.Entry<String, List<Labour>> entry : projectGroups.entrySet()) {
+            String projectName = entry.getKey();
+            List<Labour> projectLabours = entry.getValue();
+
+            long totalLabour = projectLabours.size();
+            long totalWorkingDays = 0;
+            double totalHours = 0;
+            double totalAmount = 0;
+
+            for (Labour labour : projectLabours) {
+                List<LabourAttendance> attendances =
+                        attendanceRepository.findByLabourIdAndAttendanceDateBetween(
+                                labour.getId(), startDate, endDate);
+
+                long daysWorked = attendances.stream()
+                        .filter(LabourAttendance::getIsPresent)
+                        .count();
+
+                double hoursWorked = attendances.stream()
+                        .filter(a -> a.getInTime() != null && a.getOutTime() != null)
+                        .mapToDouble(a -> ChronoUnit.HOURS.between(a.getInTime(), a.getOutTime()))
+                        .sum();
+
+                totalWorkingDays += daysWorked;
+                totalHours += hoursWorked;
+
+                double dailyRate = contractorLabourRateRepository
+                        .findByContractorAndLabourType(contractor, labour.getLabourType())
+                        .map(ContractorLabourRate::getDailyRate)
+                        .orElse(0.0);
+
+                totalAmount += dailyRate * daysWorked;
+            }
+
+            reports.add(ContractorProjectMonthlyReportDto.builder()
+                    .contractorName(contractor.getContractorName())
+                    .projectName(projectName)
+                    .month(startDate.getMonth() + " " + year)
+                    .totalLabour(totalLabour)
+                    .totalWorkingDays(totalWorkingDays)
+                    .totalHours(totalHours)
+                    .totalAmount(totalAmount)
+                    .build());
+        }
+
+        return reports;
     }
 
 

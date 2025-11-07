@@ -134,4 +134,27 @@ public class LabourController {
                     .body(new ApiResponse<>(false, "Failed to add labour type", null));
         }
     }
+
+    @GetMapping("/labourReport")
+    public ResponseEntity<ApiResponse<List<LabourMonthlyReportDto>>> getMonthlyReport(
+            @RequestParam Long contractorId,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        try {
+            List<LabourMonthlyReportDto> reports = labourService.getMonthlyReport(contractorId, year, month);
+
+            return ResponseEntity.ok(
+                    ApiResponse.<List<LabourMonthlyReportDto>>builder()
+                            .status(true)
+                            .message("Monthly report generated successfully.")
+                            .data(reports)
+                            .build()
+            );
+
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to generate report: " + e.getMessage());
+        }
+    }
 }

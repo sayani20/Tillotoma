@@ -42,4 +42,5 @@ public interface ContractorService {
 
     //List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date);
     List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate);
+    public List<ContractorProjectMonthlyReportDto> getMonthlyProjectReport(Long contractorId, int year, int month);
 }

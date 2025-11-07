@@ -8,6 +8,8 @@ import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -147,6 +149,33 @@ public class ContractorController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(new ApiResponse<>(false, "Failed to fetch contractor attendance report", null));
+        }
+    }
+
+    @GetMapping("/projectReport")
+    public ResponseEntity<ApiResponse<List<ContractorProjectMonthlyReportDto>>> getContractorProjectReport(
+            @RequestParam Long contractorId,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        try {
+
+            LocalDate now = LocalDate.now();
+            int selectedYear = (year != null) ? year : now.getYear();
+            int selectedMonth = (month != null) ? month : now.getMonthValue();
+
+            List<ContractorProjectMonthlyReportDto> report =
+                    contractorService.getMonthlyProjectReport(contractorId, selectedYear, selectedMonth);
+
+            return ResponseEntity.ok(
+                    ApiResponse.<List<ContractorProjectMonthlyReportDto>>builder()
+                            .status(true)
+                            .message("Monthly project report generated successfully.")
+                            .data(report)
+                            .build()
+            );
+        }
+        catch (Exception e){
+            throw new RuntimeException("Failed to generate bill"+e.getMessage());
         }
     }
 }

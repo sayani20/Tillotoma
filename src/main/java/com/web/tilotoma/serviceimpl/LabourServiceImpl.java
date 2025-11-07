@@ -1,24 +1,24 @@
 package com.web.tilotoma.serviceimpl;
 
+import com.web.tilotoma.dto.LabourMonthlyReportDto;
 import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourResponse;
 import com.web.tilotoma.dto.LabourTypeRequest;
 import com.web.tilotoma.dto.response.LabourResponseDto;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourType;
-import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.entity.*;
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
-import com.web.tilotoma.repository.ContractorRepository;
-import com.web.tilotoma.repository.LabourRepository;
-import com.web.tilotoma.repository.LabourTypeRepository;
-import com.web.tilotoma.repository.ProjectRepo;
+import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.LabourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class LabourServiceImpl implements LabourService {
@@ -30,6 +30,12 @@ public class LabourServiceImpl implements LabourService {
     LabourTypeRepository labourTypeRepository;
     @Autowired
     ProjectRepo projectRepo;
+    @Autowired
+    LabourAttendanceRepository attendanceRepo;
+    @Autowired
+    ContractorLabourRateRepository rateRepo;
+    @Autowired
+    ContractorRepository contractorRepo;
 
     // Add Labour Under Contractor
    /* public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
@@ -194,6 +200,63 @@ public class LabourServiceImpl implements LabourService {
                 .build();
 
         return labourTypeRepository.save(labourType);
+    }
+
+    public List<LabourMonthlyReportDto> getMonthlyReport(Long contractorId, int year, int month) {
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // ✅ Get attendance for all labours under this contractor
+        List<LabourAttendance> attendances =
+                attendanceRepo.findByLabour_Contractor_IdAndAttendanceDateBetween(contractorId, startDate, endDate);
+
+        if (attendances.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // ✅ Group attendance by labour
+        Map<Labour, List<LabourAttendance>> grouped =
+                attendances.stream().collect(Collectors.groupingBy(LabourAttendance::getLabour));
+
+        // ✅ Get contractor entity once
+        Contractor contractor = contractorRepo.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        List<LabourMonthlyReportDto> reportList = new ArrayList<>();
+
+        for (Map.Entry<Labour, List<LabourAttendance>> entry : grouped.entrySet()) {
+            Labour labour = entry.getKey();
+            List<LabourAttendance> records = entry.getValue();
+
+            long daysWorked = records.stream()
+                    .filter(LabourAttendance::getIsPresent)
+                    .count();
+
+            double totalHours = records.stream()
+                    .filter(r -> r.getInTime() != null && r.getOutTime() != null)
+                    .mapToDouble(r -> ChronoUnit.MINUTES.between(r.getInTime(), r.getOutTime()) / 60.0)
+                    .sum();
+
+            // ✅ Fetch daily rate using your repository
+            double dailyRate = rateRepo.findByContractorAndLabourType(contractor, labour.getLabourType())
+                    .map(ContractorLabourRate::getDailyRate)
+                    .orElse(0.0);
+
+            double totalAmount = dailyRate * daysWorked;
+
+            reportList.add(LabourMonthlyReportDto.builder()
+                    .labourName(labour.getLabourName())
+                    .labourType(labour.getLabourType().getTypeName()) // assuming LabourType has `typeName`
+                    .daysWorked(daysWorked)
+                    .totalHours(totalHours)
+                    .dailyRate(dailyRate)
+                    .totalAmount(totalAmount)
+                    .contractorId(contractorId)
+                    .build());
+        }
+
+        return reportList;
     }
 
 }

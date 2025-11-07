@@ -80,10 +80,17 @@ public class SignUpServiceImpl implements SignUpService {
                 .mobileNumber(userDto.getMobileNumber())
                 .aadharNumber(userDto.getAadharNumber())
                 .role(role)
-                .createdBy(userDto.getCreatedBy() != null ? userRepo.findById(userDto.getCreatedBy()).orElse(null) : null)
-                .lastUpdateRemarks(userDto.getLastUpdateRemarks())
                 .isActive(true)
+                .lastUpdateRemarks(userDto.getLastUpdateRemarks())
                 .build();
+
+        // ✅ Only set CreatedBy if passed, otherwise keep null (no proxy initialization)
+        if (userDto.getCreatedBy() != null) {
+            User createdByUser = userRepo.findById(userDto.getCreatedBy())
+                    .orElseThrow(() -> new RuntimeException("Invalid createdBy userId"));
+            user.setCreatedBy(createdByUser);
+        }
+
         return userRepo.save(user);
     }
 

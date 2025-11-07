@@ -44,7 +44,7 @@ public class User {
         private Role role;
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "created_by")
+        @JoinColumn(name = "created_by", nullable = true)
         private com.web.tilotoma.entity.User createdBy;
 
         @Column(name = "is_active")

@@ -112,4 +112,20 @@ public class ProjectController {
                     .body(new ApiResponse<>(false, "Failed to delete project", null));
         }
     }
+
+    @PutMapping("/updateStatus")
+    public ResponseEntity<ApiResponse<String>> updateProjectStatus(
+            @RequestParam Long id,
+            @RequestParam Boolean isActive) {
+        try {
+            String message = projectService.updateProjectStatus(id, isActive);
+            return ResponseEntity.ok(new ApiResponse<>(true, message, null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to update project status", null));
+        }
+    }
 }

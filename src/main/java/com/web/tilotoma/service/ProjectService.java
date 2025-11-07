@@ -13,4 +13,5 @@ public interface ProjectService {
     public String deleteProject(Long id);
     public Project createProject(ProjectDto projectDto);
     public List<Project> getAllProjects() ;
+    String updateProjectStatus(Long id, Boolean isActive);
 }

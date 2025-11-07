@@ -109,4 +109,15 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> getAllProjects() {
         return projectRepo.findAll();
     }
+
+    public String updateProjectStatus(Long id, Boolean isActive) {
+        Project project = projectRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
+
+        project.setIsActive(isActive);
+        projectRepo.save(project);
+
+        String statusText = isActive ? "activated" : "deactivated";
+        return "Project successfully " + statusText + " (id: " + id + ")";
+    }
 }

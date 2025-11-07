@@ -62,17 +62,21 @@ public class SignUpServiceImpl implements SignUpService {
 
     @Override
     public User createUser(UserDto userDto) {
+        // 🔹 Check if email already exists
         if (userRepo.findByEmail(userDto.getEmail()).isPresent()) {
             throw new RuntimeException("User already exists with email: " + userDto.getEmail());
         }
 
+        // 🔹 Validate role
         Role role = roleRepo.findById(userDto.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + userDto.getRoleId()));
 
+        // 🔹 Validate password
         if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
             throw new RuntimeException("Password cannot be empty.");
         }
 
+        // 🔹 Build user
         User user = User.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
@@ -84,15 +88,20 @@ public class SignUpServiceImpl implements SignUpService {
                 .lastUpdateRemarks(userDto.getLastUpdateRemarks())
                 .build();
 
-        // ✅ Only set CreatedBy if passed, otherwise keep null (no proxy initialization)
+        // 🔹 Optional createdBy handling
         if (userDto.getCreatedBy() != null) {
-            User createdByUser = userRepo.findById(userDto.getCreatedBy())
-                    .orElseThrow(() -> new RuntimeException("Invalid createdBy userId"));
-            user.setCreatedBy(createdByUser);
+            userRepo.findById(userDto.getCreatedBy())
+                    .ifPresentOrElse(
+                            user::setCreatedBy,
+                            () -> System.out.println("⚠️ createdBy user not found, skipping...")
+                    );
         }
 
+        // 🔹 Save user
         return userRepo.save(user);
     }
+
+
 
     @Override
     public User login(LoginDto loginDto) {

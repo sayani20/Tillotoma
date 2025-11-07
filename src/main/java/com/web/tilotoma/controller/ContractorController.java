@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contractor")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class ContractorController {
 
     @Autowired

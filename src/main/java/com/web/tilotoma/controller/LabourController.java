@@ -157,4 +157,52 @@ public class LabourController {
             throw new RuntimeException("Failed to generate report: " + e.getMessage());
         }
     }
+
+
+    // ✅ Update Labour Type
+    @PutMapping("/labourType/updateLabourType/{id}")
+    public ResponseEntity<ApiResponse<LabourType>> updateLabourType(
+            @PathVariable Long id,
+            @RequestBody LabourTypeRequest request) {
+        try {
+            LabourType updatedType = labourService.updateLabourType(id, request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Labour type updated successfully", updatedType));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to update labour type", null));
+        }
+    }
+
+    // ✅ Activate / Deactivate Labour Type
+    @PutMapping("/labourType/activeStatus/{id}")
+    public ResponseEntity<ApiResponse<LabourType>> toggleLabourTypeStatus(
+            @PathVariable Long id,
+            @RequestParam boolean isActive) {
+        try {
+            LabourType updatedType = labourService.toggleLabourTypeStatus(id, isActive);
+            String message = isActive ? "Labour type activated" : "Labour type deactivated";
+            return ResponseEntity.ok(new ApiResponse<>(true, message, updatedType));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to update status", null));
+        }
+    }
+
+    // ✅ Delete Labour Type
+    @DeleteMapping("/labourType/deleteLabourType/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteLabourType(@PathVariable Long id) {
+        try {
+            String msg = labourService.deleteLabourType(id);
+            return ResponseEntity.ok(new ApiResponse<>(true, msg, null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Failed to delete labour type", null));
+        }
+    }
 }

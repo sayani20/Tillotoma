@@ -259,4 +259,34 @@ public class LabourServiceImpl implements LabourService {
         return reportList;
     }
 
+    @Override
+    public LabourType updateLabourType(Long id, LabourTypeRequest req) {
+        LabourType existing = labourTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Labour type not found with id: " + id));
+
+        if (req.getTypeName() != null && !req.getTypeName().isEmpty()) {
+            existing.setTypeName(req.getTypeName());
+        }
+
+        return labourTypeRepository.save(existing);
+    }
+
+    @Override
+    public LabourType toggleLabourTypeStatus(Long id, boolean isActive) {
+        LabourType type = labourTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Labour type not found with id: " + id));
+
+        type.setIsActive(isActive);
+        return labourTypeRepository.save(type);
+    }
+
+    @Override
+    public String deleteLabourType(Long id) {
+        LabourType type = labourTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Labour type not found with id: " + id));
+
+        labourTypeRepository.delete(type);
+        return "Labour type deleted successfully with ID: " + id;
+    }
+
 }

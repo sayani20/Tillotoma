@@ -29,4 +29,11 @@ public interface LabourService {
     public LabourType addLabourType(LabourTypeRequest req) ;
 
     public List<LabourMonthlyReportDto> getMonthlyReport(Long contractorId, int year, int month);
+
+
+    LabourType updateLabourType(Long id, LabourTypeRequest req);
+    LabourType toggleLabourTypeStatus(Long id, boolean isActive);
+    String deleteLabourType(Long id);
+
+
 }

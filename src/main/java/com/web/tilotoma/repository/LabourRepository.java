@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface  LabourRepository extends JpaRepository<Labour, Long> {
@@ -14,5 +15,7 @@ public interface  LabourRepository extends JpaRepository<Labour, Long> {
     List<Labour> findByLabourType(LabourType labourType);
     List<Labour> findByIsActiveTrue();
     List<Labour> findByContractorId(Long contractorId);
+    Optional<Labour> findByContractorIdAndLabourTypeId(Long contractorId, Long labourTypeId);
+
 
 }

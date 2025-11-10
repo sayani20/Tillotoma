@@ -164,10 +164,8 @@ public class ContractorServiceImpl implements ContractorService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        // All labours under contractor
         List<Labour> labours = labourRepository.findByContractor(contractor);
 
-        // Group by project
         Map<String, List<Labour>> projectGroups = labours.stream()
                 .filter(l -> l.getProjects() != null)
                 .flatMap(l -> l.getProjects().stream().map(p -> Map.entry(p.getName(), l)))
@@ -194,10 +192,13 @@ public class ContractorServiceImpl implements ContractorService {
                         .filter(LabourAttendance::getIsPresent)
                         .count();
 
-                double hoursWorked = attendances.stream()
+                double totalMinutesWorked = attendances.stream()
                         .filter(a -> a.getInTime() != null && a.getOutTime() != null)
-                        .mapToDouble(a -> ChronoUnit.HOURS.between(a.getInTime(), a.getOutTime()))
+                        .mapToDouble(a -> ChronoUnit.MINUTES.between(a.getInTime(), a.getOutTime()))
                         .sum();
+
+                // convert minutes to hours (for report only)
+                double hoursWorked = totalMinutesWorked / 60.0;
 
                 totalWorkingDays += daysWorked;
                 totalHours += hoursWorked;
@@ -207,8 +208,16 @@ public class ContractorServiceImpl implements ContractorService {
                         .map(ContractorLabourRate::getDailyRate)
                         .orElse(0.0);
 
-                totalAmount += dailyRate * daysWorked;
+                // ✅ Standard 8 hours per day
+                double perHourRate = dailyRate / 8.0;
+                double perMinuteRate = perHourRate / 60.0;
+
+                // ✅ Total amount = per minute × total minutes worked
+                totalAmount += totalMinutesWorked * perMinuteRate;
             }
+
+            totalHours = Math.round(totalHours * 100.0) / 100.0;
+            totalAmount = Math.round(totalAmount * 100.0) / 100.0;
 
             reports.add(ContractorProjectMonthlyReportDto.builder()
                     .contractorName(contractor.getContractorName())
@@ -223,6 +232,7 @@ public class ContractorServiceImpl implements ContractorService {
 
         return reports;
     }
+
 
 
 

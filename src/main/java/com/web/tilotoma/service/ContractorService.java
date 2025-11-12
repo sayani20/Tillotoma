@@ -1,6 +1,8 @@
 package com.web.tilotoma.service;
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.bill.ContractorBillingResponse;
+import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.*;
 
@@ -26,12 +28,6 @@ public interface ContractorService {
     // Get All Contractors
     public List<ContractorResponse> getAllContractorsCustom();
 
-
-
-
-
-
-
     public LabourAttendance markAttendance(Long labourId) ;
 
     public List<LabourAttendance> getAttendanceByLabour(Long labourId);
@@ -40,7 +36,12 @@ public interface ContractorService {
     public Contractor updateContractorDetails(Long contractorId, ContractorRequest request);
     public void deleteContractorDetails(Long contractorId);
 
-    //List<ContractorAttendanceReportDto> getContractorAttendanceReport(Long contractorId, LocalDate date);
     List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate);
     public List<ContractorProjectMonthlyReportDto> getMonthlyProjectReport(Long contractorId, int year, int month);
+
+
+    List<LabourBillingDetailsResponse> getLabourBillingDetails(Long contractorId, Long projectId, LocalDate fromDate, LocalDate toDate);
+
+    ApiResponse<List<ContractorBillingResponse>> getBillingReport(LocalDate fromDate, LocalDate toDate);
+
 }

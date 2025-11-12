@@ -2,15 +2,20 @@ package com.web.tilotoma.serviceimpl;
 
 
 import com.web.tilotoma.dto.*;
+
+import com.web.tilotoma.dto.bill.ContractorBillingResponse;
+
+import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.*;
 
-import com.web.tilotoma.exceptions.ResourceNotFoundException;
+
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -37,7 +42,6 @@ public class ContractorServiceImpl implements ContractorService {
     private ProjectRepo projectRepo;
     @Autowired
     ContractorLabourRateRepository contractorLabourRateRepository;
-
 
 
     //create contractor
@@ -234,15 +238,6 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
 
-
-
-
-
-
-
-
-
-
     //--------------------------Report Start-----------------------//
 
     // labour daily attendance mark
@@ -337,5 +332,139 @@ public class ContractorServiceImpl implements ContractorService {
     }
     //--------------------------Report END-----------------------//
 
+
+    @Override
+    public ApiResponse<List<ContractorBillingResponse>> getBillingReport(LocalDate fromDate, LocalDate toDate) {
+
+        List<ContractorBillingResponse> billingList = new ArrayList<>();
+        List<Contractor> contractors = contractorRepository.findAll();
+
+        System.out.println("==== BILLING REPORT START ====");
+        System.out.println("From: " + fromDate + " | To: " + toDate);
+
+        for (Contractor contractor : contractors) {
+            System.out.println("\nContractor: " + contractor.getContractorName() + " (ID: " + contractor.getId() + ")");
+
+
+            List<Project> projects = projectRepo.findProjectsByLabourContractor(contractor);
+            System.out.println("  Total Projects Found: " + projects.size());
+
+            for (Project project : projects) {
+                System.out.println("  -> Project: " + project.getName() + " (ID: " + project.getId() + ")");
+
+
+                List<Labour> labours = labourRepository.findByProjects(project);
+                System.out.println("     Total Labours: " + labours.size());
+
+                double totalProjectHours = 0.0;
+                double totalProjectAmount = 0.0;
+
+                for (Labour labour : labours) {
+                    List<LabourAttendance> attendances =
+                            attendanceRepository.findByLabourAndAttendanceDateBetween(labour, fromDate, toDate);
+
+                    double totalHoursForLabour = attendances.stream()
+                            .mapToDouble(a -> {
+                                if (a.getInTime() != null && a.getOutTime() != null) {
+                                    Duration duration = Duration.between(a.getInTime(), a.getOutTime());
+                                    return duration.toMinutes() / 60.0;
+                                }
+                                return 0.0;
+                            })
+                            .sum();
+
+                    double amountForLabour = 0.0;
+                    if (labour.getRatePerDay() != null && labour.getRatePerDay() > 0) {
+                        amountForLabour = (labour.getRatePerDay() / 8.0) * totalHoursForLabour;
+                    }
+
+                    totalProjectHours += totalHoursForLabour;
+                    totalProjectAmount += amountForLabour;
+
+                    System.out.println("       Labour: " + labour.getLabourName() + " | Hours: "
+                            + totalHoursForLabour + " | Amount: " + amountForLabour);
+                }
+
+                ContractorBillingResponse response = new ContractorBillingResponse();
+                response.setContractorId(contractor.getId());
+                response.setContractorName(contractor.getContractorName());
+                response.setContractorEmail(contractor.getEmail());
+                response.setContractorMobile(contractor.getMobileNumber());
+                response.setTotalHours(round(totalProjectHours));
+                response.setTotalAmount(round(totalProjectAmount));
+                response.setProjectId(project.getId());
+                response.setProjectName(project.getName());
+                response.setTotalLabours(labours.size());
+
+                billingList.add(response);
+
+                System.out.println("  Project Summary -> Hours: " + totalProjectHours + ", Amount: " + totalProjectAmount);
+            }
+        }
+
+        System.out.println("\n==== BILLING REPORT END ====");
+
+        return new ApiResponse<>(true, "Billing report fetched successfully", billingList);
+    }
+
+
+    @Override
+    public List<LabourBillingDetailsResponse> getLabourBillingDetails(
+            Long contractorId, Long projectId, LocalDate fromDate, LocalDate toDate) {
+
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // all labours assigned to this project
+        List<Labour> labours = labourRepository.findByProjects(project);
+
+        List<LabourBillingDetailsResponse> responseList = new ArrayList<>();
+
+        for (Labour labour : labours) {
+            // filter by same contractor just to be safe
+            if (!labour.getContractor().getId().equals(contractorId)) continue;
+
+            List<LabourAttendance> attendances = attendanceRepository
+                    .findByLabourAndAttendanceDateBetween(labour, fromDate, toDate);
+
+            long totalDays = attendances.stream()
+                    .filter(LabourAttendance::getIsPresent)
+                    .count();
+
+            double totalHours = attendances.stream()
+                    .mapToDouble(a -> {
+                        if (a.getInTime() != null && a.getOutTime() != null) {
+                            return Duration.between(a.getInTime(), a.getOutTime()).toMinutes() / 60.0;
+                        }
+                        return 0.0;
+                    })
+                    .sum();
+
+            Double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
+            Double billAmount = (ratePerDay / 8.0) * totalHours;
+
+            LabourBillingDetailsResponse dto = LabourBillingDetailsResponse.builder()
+                    .labourId(labour.getId())
+                    .labourName(labour.getLabourName())
+                    .labourType(labour.getLabourType().getTypeName())
+                    .totalDays(totalDays)
+                    .totalHours(round(totalHours))
+                    .ratePerDay(ratePerDay)
+                    .billAmount(round(billAmount))
+                    .build();
+
+            responseList.add(dto);
+        }
+
+        return responseList;
+    }
+
+
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
 
 }

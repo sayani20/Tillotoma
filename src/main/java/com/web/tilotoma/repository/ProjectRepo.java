@@ -1,9 +1,24 @@
 package com.web.tilotoma.repository;
 
+import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface ProjectRepo extends JpaRepository<Project,Long> {
+    List<Project> findByContractorId(Long contractorId);
+    List<Project> findByContractor(Contractor contractor);
+
+    // ✅ New query: fetch projects using labour-project relation
+    @Query("""
+           SELECT DISTINCT p FROM Project p
+           JOIN p.labours l
+           WHERE l.contractor = :contractor
+           """)
+    List<Project> findProjectsByLabourContractor(@Param("contractor") Contractor contractor);
 }

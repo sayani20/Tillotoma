@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface ContractorLabourRateRepository extends JpaRepository<ContractorLabourRate, Long> {
     List<ContractorLabourRate> findByContractor(Contractor contractor);
     Optional<ContractorLabourRate> findByContractorAndLabourType(Contractor contractor, LabourType labourType);
+
+
+
 }

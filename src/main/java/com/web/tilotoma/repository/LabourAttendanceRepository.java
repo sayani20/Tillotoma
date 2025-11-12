@@ -11,10 +11,22 @@ import java.util.Optional;
 @Repository
 public interface LabourAttendanceRepository extends JpaRepository<LabourAttendance, Long> {
     List<LabourAttendance> findByLabour(Labour labour);
+
     List<LabourAttendance> findByAttendanceDate(LocalDate date);
+
     List<LabourAttendance> findByLabourAndAttendanceDate(Labour labour, LocalDate date);
+
     Optional<LabourAttendance> findByLabourIdAndAttendanceDate(Long labourId, LocalDate attendanceDate);
+
     List<LabourAttendance> findByLabourIdOrderByAttendanceDateDesc(Long labourId);
+
     List<LabourAttendance> findByLabourIdAndAttendanceDateBetween(Long labourId, LocalDate startDate, LocalDate endDate);
+
     List<LabourAttendance> findByLabour_Contractor_IdAndAttendanceDateBetween(Long contractorId, LocalDate startDate, LocalDate endDate);
+
+    List<LabourAttendance> findByLabourAndAttendanceDateBetween(
+            Labour labour,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

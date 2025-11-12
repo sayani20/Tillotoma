@@ -71,6 +71,11 @@ public class Project {
     @JoinColumn(name = "contractor_id")
     @JsonBackReference
     private Contractor contractor;
+
+    @ManyToMany(mappedBy = "projects")
+    @JsonIgnoreProperties("projects")
+    private List<Labour> labours;
+
 }
 
 

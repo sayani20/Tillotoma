@@ -37,31 +37,7 @@ public class LabourServiceImpl implements LabourService {
     @Autowired
     ContractorRepository contractorRepo;
 
-    // Add Labour Under Contractor
-   /* public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
-        Contractor contractor = contractorRepository.findById(contractorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Contractor not found"));
 
-        LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Labour type not found"));
-
-        // Projects fetch
-        List<Project> projects = new ArrayList<>();
-        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
-            projects = projectRepo.findAllById(req.getProjectIds());
-        }
-
-        Labour labour = Labour.builder()
-                .labourName(req.getLabourName())
-                .email(req.getEmail())
-                .mobileNumber(req.getMobileNumber())
-                .labourType(labourType)
-                .contractor(contractor)
-                .projects(projects)
-                .build();
-
-        return labourRepo.save(labour);
-    }*/
     public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
         Contractor contractor = contractorRepository.findById(req.getContractorId())
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
@@ -81,6 +57,12 @@ public class LabourServiceImpl implements LabourService {
                 .ratePerHour(ratePerHour)
                 .isActive(true)
                 .build();
+
+        // ✅ Add Projects if provided
+        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
+            List<Project> projects = projectRepo.findAllById(req.getProjectIds());
+            labour.setProjects(projects);
+        }
 
         return labourRepo.save(labour);
     }

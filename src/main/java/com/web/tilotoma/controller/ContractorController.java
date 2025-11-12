@@ -1,11 +1,14 @@
 package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.dto.bill.ContractorBillingResponse;
+import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.Contractor;
 import com.web.tilotoma.entity.LabourAttendance;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -177,5 +180,29 @@ public class ContractorController {
         catch (Exception e){
             throw new RuntimeException("Failed to generate bill"+e.getMessage());
         }
+    }
+
+
+    //-----------------
+
+    @GetMapping("/billReportDateWise")
+    public ApiResponse<List<ContractorBillingResponse>> getBillingReport(
+            @RequestParam("fromDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("toDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        return contractorService.getBillingReport(fromDate, toDate);
+    }
+
+    @GetMapping("/labourBillingDetails")
+    public ResponseEntity<ApiResponse<List<LabourBillingDetailsResponse>>> getLabourBillingDetails(
+            @RequestParam Long contractorId,
+            @RequestParam Long projectId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        List<LabourBillingDetailsResponse> report =
+                contractorService.getLabourBillingDetails(contractorId, projectId, fromDate, toDate);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "Labour billing details fetched successfully", report));
     }
 }

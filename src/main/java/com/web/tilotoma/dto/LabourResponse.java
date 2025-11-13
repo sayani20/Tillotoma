@@ -19,6 +19,8 @@ public class LabourResponse {
     private Long labourTypeId;
     private String labourTypeName;
 
+    private List<ProjectSimpleResponse> projects;
+
    /* private List<Long> projectIds;
     private List<String> projectNames;*/
 }

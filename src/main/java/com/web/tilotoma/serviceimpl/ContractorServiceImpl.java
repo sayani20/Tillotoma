@@ -14,15 +14,13 @@ import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +77,7 @@ public class ContractorServiceImpl implements ContractorService {
         return savedContractor;
     }
 
-    // Get All Contractors
+    @Transactional(readOnly = true)
     public List<ContractorResponse> getAllContractorsCustom() {
         List<Contractor> contractors = contractorRepository.findAll();
 
@@ -95,6 +93,20 @@ public class ContractorServiceImpl implements ContractorService {
                         .count();
             }
 
+            // Map projects to ProjectSimpleResponse, guard null
+            List<ProjectSimpleResponse> projectResponses = contractor.getProjects() != null
+                    ? contractor.getProjects().stream()
+                    .map(p -> ProjectSimpleResponse.builder()
+                            .id(p.getId())
+                            .name(p.getName())
+                            .location(p.getLocation())
+                            .city(p.getCity())
+                            .state(p.getState())
+                            .isActive(p.getIsActive())
+                            .build())
+                    .collect(Collectors.toList())
+                    : Collections.emptyList();
+
             return ContractorResponse.builder()
                     .id(contractor.getId())
                     .contractorName(contractor.getContractorName())
@@ -105,6 +117,7 @@ public class ContractorServiceImpl implements ContractorService {
                     .createdOn(contractor.getCreatedOn())
                     .labourCount(labourCount)
                     .labourTypeCount(labourTypeCount)
+                    .projects(projectResponses)   // <-- new
                     .build();
         }).collect(Collectors.toList());
     }

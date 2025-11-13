@@ -1,6 +1,8 @@
 package com.web.tilotoma.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +24,6 @@ public class ContractorResponse {
 
     private Long labourCount;      // মোট লেবার সংখ্যা
     private Long labourTypeCount;  // মোট আলাদা টাইপ সংখ্যা
+
+    private List<ProjectSimpleResponse> projects;
 }

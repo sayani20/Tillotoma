@@ -1,9 +1,6 @@
 package com.web.tilotoma.serviceimpl;
 
-import com.web.tilotoma.dto.LabourMonthlyReportDto;
-import com.web.tilotoma.dto.LabourRequest;
-import com.web.tilotoma.dto.LabourResponse;
-import com.web.tilotoma.dto.LabourTypeRequest;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.dto.response.LabourResponseDto;
 import com.web.tilotoma.entity.*;
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
@@ -11,6 +8,7 @@ import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.LabourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -67,21 +65,45 @@ public class LabourServiceImpl implements LabourService {
         return labourRepo.save(labour);
     }
 
-    // Get All Labours
+    @Transactional(readOnly = true)
     public List<LabourResponse> getAllLabours() {
+
         List<Labour> labours = labourRepo.findAll();
 
-        return labours.stream().map(labour -> LabourResponse.builder()
-                .id(labour.getId())
-                .labourName(labour.getLabourName())
-                .email(labour.getEmail())
-                .mobileNumber(labour.getMobileNumber())
-                .contractorId(labour.getContractor() != null ? labour.getContractor().getId() : null)
-                .contractorName(labour.getContractor() != null ? labour.getContractor().getContractorName() : null)
-                .labourTypeId(labour.getLabourType() != null ? labour.getLabourType().getId() : null)
-                .labourTypeName(labour.getLabourType() != null ? labour.getLabourType().getTypeName() : null)
-                .build()
-        ).toList();
+        return labours.stream().map(labour -> {
+
+            // Force initialize lazy lists safely inside transaction
+            if (labour.getProjects() != null) {
+                labour.getProjects().size();
+            }
+
+            List<ProjectSimpleResponse> projectList =
+                    labour.getProjects() != null ?
+                            labour.getProjects().stream()
+                                    .map(p -> ProjectSimpleResponse.builder()
+                                            .id(p.getId())
+                                            .name(p.getName())
+                                            .location(p.getLocation())
+                                            .city(p.getCity())
+                                            .state(p.getState())
+                                            .isActive(p.getIsActive())
+                                            .build())
+                                    .toList()
+                            : List.of();
+
+            return LabourResponse.builder()
+                    .id(labour.getId())
+                    .labourName(labour.getLabourName())
+                    .email(labour.getEmail())
+                    .mobileNumber(labour.getMobileNumber())
+                    .contractorId(labour.getContractor() != null ? labour.getContractor().getId() : null)
+                    .contractorName(labour.getContractor() != null ? labour.getContractor().getContractorName() : null)
+                    .labourTypeId(labour.getLabourType() != null ? labour.getLabourType().getId() : null)
+                    .labourTypeName(labour.getLabourType() != null ? labour.getLabourType().getTypeName() : null)
+                    .projects(projectList)     // <-- Added
+                    .build();
+
+        }).toList();
     }
 
     //contractorId wise Labour

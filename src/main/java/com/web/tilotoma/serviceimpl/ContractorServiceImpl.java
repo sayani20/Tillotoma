@@ -122,6 +122,7 @@ public class ContractorServiceImpl implements ContractorService {
                     .mobileNumber(contractor.getMobileNumber())
                     .isActive(contractor.getIsActive())
                     .createdOn(contractor.getCreatedOn())
+                    .address(contractor.getAddress())
                     .labourCount(labourCount)
                     .labourTypeCount(labourTypeCount)
                     .projects(projectResponses)   // <-- new

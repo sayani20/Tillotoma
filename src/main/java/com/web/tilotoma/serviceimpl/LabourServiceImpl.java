@@ -96,6 +96,8 @@ public class LabourServiceImpl implements LabourService {
                     .labourName(labour.getLabourName())
                     .email(labour.getEmail())
                     .mobileNumber(labour.getMobileNumber())
+                    .ratePerDay(labour.getRatePerDay())
+                    .ratePerHour(labour.getRatePerHour())
                     .contractorId(labour.getContractor() != null ? labour.getContractor().getId() : null)
                     .contractorName(labour.getContractor() != null ? labour.getContractor().getContractorName() : null)
                     .labourTypeId(labour.getLabourType() != null ? labour.getLabourType().getId() : null)

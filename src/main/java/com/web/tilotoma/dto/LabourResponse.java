@@ -15,6 +15,8 @@ public class LabourResponse {
 
     private Long contractorId;
     private String contractorName;
+    private Double ratePerDay;
+    private Double ratePerHour;
 
     private Long labourTypeId;
     private String labourTypeName;

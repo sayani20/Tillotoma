@@ -21,7 +21,7 @@ public class ContractorResponse {
     private String mobileNumber;
     private Boolean isActive;
     private LocalDateTime createdOn;
-
+    private String address;
     private Long labourCount;      // মোট লেবার সংখ্যা
     private Long labourTypeCount;  // মোট আলাদা টাইপ সংখ্যা
 

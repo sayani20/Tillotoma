@@ -7,6 +7,8 @@ import com.web.tilotoma.dto.bill.ContractorBillingResponse;
 
 import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
+import com.web.tilotoma.dto.response.LabourBillingDto;
+import com.web.tilotoma.dto.response.ProjectBillingDto;
 import com.web.tilotoma.entity.*;
 
 
@@ -44,6 +46,12 @@ public class ContractorServiceImpl implements ContractorService {
 
     //create contractor
     public Contractor addContractor(ContractorRequest req) {
+
+        // 0️⃣ **Project mandatory validation**
+        if (req.getProjectIds() == null || req.getProjectIds().isEmpty()) {
+            throw new RuntimeException("Project type is required. Please select at least one project.");
+        }
+
         // 1️⃣ Contractor create
         Contractor contractor = Contractor.builder()
                 .contractorName(req.getContractorName())
@@ -58,24 +66,23 @@ public class ContractorServiceImpl implements ContractorService {
         Contractor savedContractor = contractorRepository.save(contractor);
 
         // 3️⃣ Multiple Project assign (if provided)
-        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
-            List<Project> projects = projectRepo.findAllById(req.getProjectIds());
+        List<Project> projects = projectRepo.findAllById(req.getProjectIds());
 
-            if (projects.isEmpty()) {
-                throw new RuntimeException("No projects found for given IDs: " + req.getProjectIds());
-            }
-
-            // প্রতিটা project এ contractor assign করো
-            for (Project project : projects) {
-                project.setContractor(savedContractor);
-            }
-
-            // একবারে সব project save করো
-            projectRepo.saveAll(projects);
+        if (projects.isEmpty()) {
+            throw new RuntimeException("No projects found for given IDs: " + req.getProjectIds());
         }
+
+        // Assign contractor to each project
+        for (Project project : projects) {
+            project.setContractor(savedContractor);
+        }
+
+        // Save all updated projects
+        projectRepo.saveAll(projects);
 
         return savedContractor;
     }
+
 
     @Transactional(readOnly = true)
     public List<ContractorResponse> getAllContractorsCustom() {

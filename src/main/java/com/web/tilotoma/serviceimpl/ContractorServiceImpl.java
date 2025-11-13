@@ -160,18 +160,50 @@ public class ContractorServiceImpl implements ContractorService {
                 .build();
     }
 
-    //contractorId wise details update
+    @Override
     public Contractor updateContractorDetails(Long contractorId, ContractorRequest request) {
+
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
-        contractor.setContractorName(request.getContractorName() != null ? request.getContractorName() : contractor.getContractorName());
-        contractor.setUsername(request.getUserName() != null ? request.getUserName() : contractor.getUsername());
-        contractor.setEmail(request.getEmail() != null ? request.getEmail() : contractor.getEmail());
-        contractor.setMobileNumber(request.getMobileNumber() != null ? request.getMobileNumber() : contractor.getMobileNumber());
-        contractor.setAddress(request.getAddress() != null ? request.getAddress() : contractor.getAddress());
 
+        // Update basic details
+        contractor.setContractorName(
+                request.getContractorName() != null ? request.getContractorName() : contractor.getContractorName());
+        contractor.setUsername(
+                request.getUserName() != null ? request.getUserName() : contractor.getUsername());
+        contractor.setEmail(
+                request.getEmail() != null ? request.getEmail() : contractor.getEmail());
+        contractor.setMobileNumber(
+                request.getMobileNumber() != null ? request.getMobileNumber() : contractor.getMobileNumber());
+        contractor.setAddress(
+                request.getAddress() != null ? request.getAddress() : contractor.getAddress());
+
+        // ----------------------------------------------
+        // 🔥 PROJECT UPDATE LOGIC (THIS WAS MISSING)
+        // ----------------------------------------------
+        if (request.getProjectIds() != null) {
+
+            // আগে পুরানো contractor এর সব project unlink করে দিই
+            List<Project> oldProjects = contractor.getProjects();
+            if (oldProjects != null) {
+                for (Project p : oldProjects) {
+                    p.setContractor(null);
+                }
+            }
+
+            // new project assign
+            List<Project> newProjects = projectRepo.findAllById(request.getProjectIds());
+            for (Project p : newProjects) {
+                p.setContractor(contractor);
+            }
+
+            contractor.setProjects(newProjects);
+        }
+
+        // finally save
         return contractorRepository.save(contractor);
     }
+
 
     //delete contractor
     public void deleteContractorDetails(Long contractorId) {

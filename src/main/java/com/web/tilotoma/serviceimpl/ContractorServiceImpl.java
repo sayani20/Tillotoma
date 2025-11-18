@@ -443,8 +443,8 @@ public class ContractorServiceImpl implements ContractorService {
                 response.setContractorName(contractor.getContractorName());
                 response.setContractorEmail(contractor.getEmail());
                 response.setContractorMobile(contractor.getMobileNumber());
-                response.setTotalHours(round(totalProjectHours));
-                response.setTotalAmount(round(totalProjectAmount));
+                response.setTotalHours(totalProjectHours);
+                response.setTotalAmount(totalProjectAmount);
                 response.setProjectId(project.getId());
                 response.setProjectName(project.getName());
                 response.setTotalLabours(labours.size());

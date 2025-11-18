@@ -61,8 +61,23 @@ public class LabourServiceImpl implements LabourService {
             List<Project> projects = projectRepo.findAllById(req.getProjectIds());
             labour.setProjects(projects);
         }
+        Labour saved = labourRepo.save(labour);
 
-        return labourRepo.save(labour);
+        // STEP 2: userId generate (NO helper method)
+        String labourName = saved.getLabourName();
+
+        String namePart = labourName.length() >= 3
+                ? labourName.substring(0, 3).toLowerCase()
+                : labourName.toLowerCase();
+
+        String idPart = String.format("%03d", saved.getId());
+
+        String userId = namePart + idPart;   // e.g., ram002
+
+        saved.setLabourUserId(userId);
+
+        // STEP 3: Save again with userId
+        return labourRepo.save(saved);
     }
 
     @Transactional(readOnly = true)

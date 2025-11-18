@@ -16,6 +16,7 @@ import java.util.List;
 public class ContractorAttendanceReportDto {
     private Long labourId;
     private String labourName;
+    private String labourUserId;
 
     private LabourTypeDto labourType;
     private List<ProjectDto> projects;
@@ -49,5 +50,6 @@ public class ContractorAttendanceReportDto {
         private LocalTime inTime;
         private LocalTime outTime;
         private Boolean isPresent;
+        private Boolean isCheck;
     }
 }

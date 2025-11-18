@@ -353,6 +353,7 @@ public class ContractorServiceImpl implements ContractorService {
                 ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
                         .labourId(labour.getId())
                         .labourName(labour.getLabourName())
+                        .labourUserId(labour.getLabourUserId())
                         .labourType(
                                 ContractorAttendanceReportDto.LabourTypeDto.builder()
                                         .id(labour.getLabourType().getId())
@@ -373,6 +374,7 @@ public class ContractorServiceImpl implements ContractorService {
                                         .inTime(attendance.getInTime())
                                         .outTime(attendance.getOutTime())
                                         .isPresent(attendance.getIsPresent())
+                                        .isCheck(attendance.getIsCheck())
                                         .build()
                         )
                         .build();

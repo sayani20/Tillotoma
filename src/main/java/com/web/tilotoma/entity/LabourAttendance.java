@@ -29,4 +29,7 @@ public class LabourAttendance {
 
     @Column(name = "is_present")
     private Boolean isPresent = true;
+
+    @Column(name = "is_check")
+    private Boolean isCheck = true;
 }

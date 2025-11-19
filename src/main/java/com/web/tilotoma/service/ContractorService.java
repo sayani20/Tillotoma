@@ -45,4 +45,6 @@ public interface ContractorService {
 
     ApiResponse<List<ContractorBillingResponse>> getBillingReport(LocalDate fromDate, LocalDate toDate);
 
+    String updateIsCheck(Long labourId, LocalDate attendanceDate, Boolean isCheck);
+
 }

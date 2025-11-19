@@ -181,6 +181,21 @@ public class ContractorController {
             throw new RuntimeException("Failed to generate bill"+e.getMessage());
         }
     }
+    @PostMapping("/update-isCheck")
+    public ResponseEntity<ApiResponse<String>> updateIsCheck(@RequestBody UpdateIsCheckRequest request) {
+        try {
+            String msg = contractorService.updateIsCheck(
+                    request.getLabourId(),
+                    request.getAttendanceDate(),
+                    request.getIsCheck()
+            );
+
+            return ResponseEntity.ok(new ApiResponse<>(true, msg, null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, e.getMessage(), null));
+        }
+    }
+
 
 
     //-----------------

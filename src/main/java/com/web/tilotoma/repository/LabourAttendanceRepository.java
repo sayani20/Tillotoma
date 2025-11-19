@@ -29,4 +29,6 @@ public interface LabourAttendanceRepository extends JpaRepository<LabourAttendan
             LocalDate startDate,
             LocalDate endDate
     );
+
+
 }

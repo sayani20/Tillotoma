@@ -10,6 +10,7 @@ import java.util.List;
 public class LabourResponse {
     private Long id;
     private String labourName;
+    private String labourUserId;
     private String email;
     private String mobileNumber;
 

@@ -62,6 +62,7 @@ public class Labour {
 
     @Column(name = "rate_per_day")
     private Double ratePerDay;
+
     @Column(name = "labour_user_id")
     private String labourUserId;
 }

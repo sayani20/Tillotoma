@@ -109,6 +109,7 @@ public class LabourServiceImpl implements LabourService {
             return LabourResponse.builder()
                     .id(labour.getId())
                     .labourName(labour.getLabourName())
+                    .labourUserId(labour.getLabourUserId())
                     .email(labour.getEmail())
                     .mobileNumber(labour.getMobileNumber())
                     .ratePerDay(labour.getRatePerDay())

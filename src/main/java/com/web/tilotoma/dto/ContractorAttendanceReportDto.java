@@ -51,5 +51,6 @@ public class ContractorAttendanceReportDto {
         private LocalTime outTime;
         private Boolean isPresent;
         private Boolean isCheck;
+        private Long durationMinutes;
     }
 }

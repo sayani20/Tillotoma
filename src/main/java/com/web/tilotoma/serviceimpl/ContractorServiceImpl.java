@@ -335,7 +335,7 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     // attendance report
-    public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate) {
+    /*public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(Long contractorId, LocalDate startDate, LocalDate endDate) {
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
 
@@ -375,6 +375,80 @@ public class ContractorServiceImpl implements ContractorService {
                                         .outTime(attendance.getOutTime())
                                         .isPresent(attendance.getIsPresent())
                                         .isCheck(attendance.getIsCheck())
+                                        .build()
+                        )
+                        .build();
+
+                reportList.add(dto);
+            }
+        }
+
+        return reportList;
+    }*/
+
+    public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(
+            Long contractorId, LocalDate startDate, LocalDate endDate) {
+
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        List<Labour> labours = labourRepository.findByContractorId(contractorId);
+        List<ContractorAttendanceReportDto> reportList = new ArrayList<>();
+
+        for (Labour labour : labours) {
+
+            List<LabourAttendance> attendances =
+                    attendanceRepository.findByLabourIdAndAttendanceDateBetween(
+                            labour.getId(), startDate, endDate);
+
+            if (attendances.isEmpty()) continue;
+
+            for (LabourAttendance attendance : attendances) {
+
+                Long durationMinutes = 0L;
+                Boolean computedIsCheck = false;
+
+                LocalTime inTime = attendance.getInTime();
+                LocalTime outTime = attendance.getOutTime();
+
+                if (inTime != null && outTime != null && !outTime.isBefore(inTime)) {
+                    Duration duration = Duration.between(inTime, outTime);
+                    durationMinutes = duration.toMinutes();
+
+                    // > 7 hours
+                    computedIsCheck = durationMinutes > (7 * 60);
+                }
+
+                // ⬅️ DB তে isCheck সেভ করে দিচ্ছি
+                attendance.setIsCheck(computedIsCheck);
+                attendanceRepository.save(attendance);
+
+                ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
+                        .labourId(labour.getId())
+                        .labourName(labour.getLabourName())
+                        .labourUserId(labour.getLabourUserId())
+                        .labourType(
+                                ContractorAttendanceReportDto.LabourTypeDto.builder()
+                                        .id(labour.getLabourType().getId())
+                                        .typeName(labour.getLabourType().getTypeName())
+                                        .build()
+                        )
+                        .projects(
+                                labour.getProjects().stream()
+                                        .map(p -> ContractorAttendanceReportDto.ProjectDto.builder()
+                                                .id(p.getId())
+                                                .name(p.getName())
+                                                .build())
+                                        .toList()
+                        )
+                        .attendance(
+                                ContractorAttendanceReportDto.AttendanceDto.builder()
+                                        .attendanceDate(attendance.getAttendanceDate())
+                                        .inTime(inTime)
+                                        .outTime(outTime)
+                                        .isPresent(attendance.getIsPresent())
+                                        .isCheck(computedIsCheck)
+                                        .durationMinutes(durationMinutes)
                                         .build()
                         )
                         .build();

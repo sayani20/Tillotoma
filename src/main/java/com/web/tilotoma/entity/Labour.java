@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Labour {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +30,13 @@ public class Labour {
 
     @Column(length = 15)
     private String mobileNumber;
+
+    // ✅ New Fields Added
+    @Column(length = 255)
+    private String address;
+
+    @Column(name = "aadhar_number", length = 20)
+    private String aadharNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "labour_type_id", nullable = false)

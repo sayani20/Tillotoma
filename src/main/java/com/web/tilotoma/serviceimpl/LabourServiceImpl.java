@@ -53,6 +53,8 @@ public class LabourServiceImpl implements LabourService {
                 .labourType(labourType)
                 .ratePerDay(ratePerDay)
                 .ratePerHour(ratePerHour)
+                .address(req.getAddress())
+                .aadharNumber(req.getAadharNumber())
                 .isActive(true)
                 .build();
 
@@ -171,6 +173,8 @@ public class LabourServiceImpl implements LabourService {
         existing.setLabourName(labourRequest.getLabourName());
         existing.setEmail(labourRequest.getEmail());
         existing.setMobileNumber(labourRequest.getMobileNumber());
+        existing.setAddress(labourRequest.getAddress());
+        existing.setAadharNumber(labourRequest.getAadharNumber());
 
         if (labourRequest.getContractorId() != null) {
             Contractor contractor = contractorRepository.findById(labourRequest.getContractorId())

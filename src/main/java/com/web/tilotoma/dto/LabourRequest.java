@@ -12,5 +12,9 @@ public class LabourRequest {
     private String mobileNumber;
     private Long labourTypeId;
     private Double ratePerDay;
+
+    private String address;
+    private String aadharNumber;
+
     private List<Long> projectIds;
 }

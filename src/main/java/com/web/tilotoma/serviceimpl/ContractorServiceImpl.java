@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -294,7 +295,7 @@ public class ContractorServiceImpl implements ContractorService {
     //--------------------------Report Start-----------------------//
 
     // labour daily attendance mark
-    public LabourAttendance markAttendance(Long labourId) {
+    /*public LabourAttendance markAttendance(Long labourId) {
         Labour labour = labourRepository.findById(labourId)
                 .orElseThrow(() -> new RuntimeException("Labour not found"));
 
@@ -319,6 +320,63 @@ public class ContractorServiceImpl implements ContractorService {
         if (attendance.getOutTime() == null) {
             // ✅ Second hit — mark Out-Time
             attendance.setOutTime(LocalTime.now());
+            return attendanceRepository.save(attendance);
+        } else {
+            // ⚠️ Already marked both times
+            throw new RuntimeException("Attendance already completed for today");
+        }
+    }*/
+    public LabourAttendance markAttendance(Long labourId) {
+        Labour labour = labourRepository.findById(labourId)
+                .orElseThrow(() -> new RuntimeException("Labour not found"));
+
+        LocalDate today = LocalDate.now();
+
+        Optional<LabourAttendance> existingAttendance =
+                attendanceRepository.findByLabourIdAndAttendanceDate(labourId, today);
+
+        if (existingAttendance.isEmpty()) {
+            // ✅ First time hit — mark In-Time
+            LabourAttendance attendance = LabourAttendance.builder()
+                    .labour(labour)
+                    .attendanceDate(today)
+                    .inTime(LocalTime.now())
+                    .isPresent(true)
+                    // isCheck ডিফল্টভাবে true রাখছি; চাহিলে এখানে null বা true/false সেট করতে পারো
+                    .isCheck(false)
+                    .build();
+            return attendanceRepository.save(attendance);
+        }
+
+        LabourAttendance attendance = existingAttendance.get();
+
+        if (attendance.getOutTime() == null) {
+            // ✅ Second hit — mark Out-Time
+            LocalTime out = LocalTime.now();
+            attendance.setOutTime(out);
+
+            // compute duration between inTime and outTime (handle crossing-midnight)
+            LocalTime in = attendance.getInTime();
+            if (in == null) {
+                // safety: যদি inTime নেই, তখন শুধু save করে দেওয়া যেতে পারে বা exception দিতে
+                throw new RuntimeException("In time not recorded for today");
+            }
+
+            LocalDateTime inDateTime = LocalDateTime.of(attendance.getAttendanceDate(), in);
+            LocalDateTime outDateTime = LocalDateTime.of(attendance.getAttendanceDate(), out);
+
+            // যদি outTime, inTime এর আগে পড়ে ধরে নেই এটা পরের দিনের আউট
+            if (out.isBefore(in)) {
+                outDateTime = outDateTime.plusDays(1);
+            }
+
+            Duration worked = Duration.between(inDateTime, outDateTime);
+
+            // যদি কাজের সময় 7 ঘণ্টার কম হয় => isCheck = false, নাহলে true
+            boolean check = !worked.minusHours(7).isNegative() || worked.toMinutes() >= 7 * 60;
+            // সরলভাবে: worked >= 7 hours -> true, else false
+            attendance.setIsCheck(check);
+
             return attendanceRepository.save(attendance);
         } else {
             // ⚠️ Already marked both times
@@ -420,8 +478,8 @@ public class ContractorServiceImpl implements ContractorService {
                 }
 
                 // ⬅️ DB তে isCheck সেভ করে দিচ্ছি
-                attendance.setIsCheck(computedIsCheck);
-                attendanceRepository.save(attendance);
+                //attendance.setIsCheck(computedIsCheck);
+                //attendanceRepository.save(attendance);
 
                 ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
                         .labourId(labour.getId())
@@ -447,7 +505,8 @@ public class ContractorServiceImpl implements ContractorService {
                                         .inTime(inTime)
                                         .outTime(outTime)
                                         .isPresent(attendance.getIsPresent())
-                                        .isCheck(computedIsCheck)
+                                        //.isCheck(computedIsCheck)
+                                        .isCheck(attendance.getIsCheck())
                                         .durationMinutes(durationMinutes)
                                         .build()
                         )

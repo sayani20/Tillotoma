@@ -723,6 +723,14 @@ public class ContractorServiceImpl implements ContractorService {
             List<LabourAttendance> attendances = attendanceRepository
                     .findByLabourAndAttendanceDateBetween(labour, fromDate, toDate);
 
+            // --- ✅ NEW LOGIC ADDED ---
+            boolean hasCheckedAttendance = attendances.stream()
+                    .anyMatch(a -> Boolean.TRUE.equals(a.getIsCheck()));
+
+            if (!hasCheckedAttendance) continue;  // এখানে লেবার বাদ দেওয়া হবে
+            // ---------------------------------
+
+
             long totalDays = attendances.stream()
                     .filter(LabourAttendance::getIsPresent)
                     .count();

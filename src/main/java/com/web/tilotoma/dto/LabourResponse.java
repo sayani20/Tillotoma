@@ -22,6 +22,9 @@ public class LabourResponse {
     private Long labourTypeId;
     private String labourTypeName;
 
+    private String address;
+    private String aadharNumber;
+
     private List<ProjectSimpleResponse> projects;
 
    /* private List<Long> projectIds;

@@ -373,7 +373,7 @@ public class ContractorServiceImpl implements ContractorService {
             Duration worked = Duration.between(inDateTime, outDateTime);
 
             // যদি কাজের সময় 7 ঘণ্টার কম হয় => isCheck = false, নাহলে true
-            boolean check = !worked.minusHours(7).isNegative() || worked.toMinutes() >= 7 * 60;
+            boolean check = !worked.minusHours(8).isNegative() || worked.toMinutes() >= 7 * 60;
             // সরলভাবে: worked >= 7 hours -> true, else false
             attendance.setIsCheck(check);
 
@@ -444,7 +444,10 @@ public class ContractorServiceImpl implements ContractorService {
         return reportList;
     }*/
 
-    public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(
+
+
+
+    /*public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(
             Long contractorId, LocalDate startDate, LocalDate endDate) {
 
         Contractor contractor = contractorRepository.findById(contractorId)
@@ -474,7 +477,7 @@ public class ContractorServiceImpl implements ContractorService {
                     durationMinutes = duration.toMinutes();
 
                     // > 7 hours
-                    computedIsCheck = durationMinutes > (7 * 60);
+                    computedIsCheck = durationMinutes > (8 * 60);
                 }
 
                 // ⬅️ DB তে isCheck সেভ করে দিচ্ছি
@@ -517,7 +520,118 @@ public class ContractorServiceImpl implements ContractorService {
         }
 
         return reportList;
+    }*/
+
+
+    public List<ContractorAttendanceReportDto> getContractorAttendanceReportBetweenDates(
+            Long contractorId, LocalDate startDate, LocalDate endDate) {
+
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        List<Labour> labours = labourRepository.findByContractorId(contractorId);
+        List<ContractorAttendanceReportDto> reportList = new ArrayList<>();
+
+        for (Labour labour : labours) {
+
+            List<LabourAttendance> attendances =
+                    attendanceRepository.findByLabourIdAndAttendanceDateBetween(
+                            labour.getId(), startDate, endDate);
+
+            if (attendances.isEmpty()) continue;
+
+            for (LabourAttendance attendance : attendances) {
+
+                Long durationMinutes = 0L;
+                Boolean computedIsCheck = false;
+                Double todayBillAmount = 0.0;
+
+                LocalTime inTime = attendance.getInTime();
+                LocalTime outTime = attendance.getOutTime();
+
+                if (inTime != null && outTime != null && !outTime.isBefore(inTime)) {
+
+                    Duration duration = Duration.between(inTime, outTime);
+                    durationMinutes = duration.toMinutes();
+                    double hours = durationMinutes / 60.0;
+
+                    double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
+
+                    // ---------------- isCheck Logic ----------------
+                    if ((hours >= 4 && hours <= 5) ||
+                            (hours >= 8 && hours <= 9) ||
+                            (hours >= 11 && hours <= 12) ||
+                            (hours >= 14 && hours <= 15)) {
+
+                        computedIsCheck = true;
+                    } else {
+                        computedIsCheck = false;
+                    }
+
+                    // ---------------- Billing Logic ----------------
+                    if (hours >= 4 && hours <= 5) {
+                        todayBillAmount = ratePerDay / 2;
+                    }
+                    else if (hours >= 8 && hours <= 9) {
+                        todayBillAmount = ratePerDay;
+                    }
+                    else if (hours >= 11 && hours <= 12) {
+                        todayBillAmount = ratePerDay * 1.5;
+                    }
+                    else if (hours >= 14 && hours <= 15) {
+                        todayBillAmount = ratePerDay * 2;
+                    }
+                    else {
+                        // Pro-rata calculation
+                        todayBillAmount = (ratePerDay / 8.0) * hours;
+                    }
+
+                    // ---------------- Save to DB (optional) ----------------
+                    // attendance.setIsCheck(computedIsCheck);
+                    // attendanceRepository.save(attendance);
+                }
+
+                ContractorAttendanceReportDto dto = ContractorAttendanceReportDto.builder()
+                        .labourId(labour.getId())
+                        .labourName(labour.getLabourName())
+                        .labourUserId(labour.getLabourUserId())
+                        .labourType(
+                                ContractorAttendanceReportDto.LabourTypeDto.builder()
+                                        .id(labour.getLabourType().getId())
+                                        .typeName(labour.getLabourType().getTypeName())
+                                        .build()
+                        )
+                        .projects(
+                                labour.getProjects().stream()
+                                        .map(p -> ContractorAttendanceReportDto.ProjectDto.builder()
+                                                .id(p.getId())
+                                                .name(p.getName())
+                                                .build())
+                                        .toList()
+                        )
+                        .attendance(
+                                ContractorAttendanceReportDto.AttendanceDto.builder()
+                                        .attendanceDate(attendance.getAttendanceDate())
+                                        .inTime(inTime)
+                                        .outTime(outTime)
+                                        .isPresent(attendance.getIsPresent())
+                                        .isCheck(computedIsCheck)
+                                        .durationMinutes(durationMinutes)
+                                        .todayBillAmount(todayBillAmount)
+                                        .build()
+                        )
+                        .build();
+
+                reportList.add(dto);
+            }
+        }
+
+        return reportList;
     }
+
+
+
+
 
 
     public String updateIsCheck(Long labourId, LocalDate attendanceDate, Boolean isCheck) {
@@ -666,7 +780,7 @@ public class ContractorServiceImpl implements ContractorService {
                     double amountForLabour = 0.0;
                     if (labour.getRatePerDay() != null && labour.getRatePerDay() > 0) {
                         // same logic as before: (ratePerDay / 7) * hours
-                        amountForLabour = (labour.getRatePerDay() / 7.0) * totalHoursForLabour;
+                        amountForLabour = (labour.getRatePerDay() / 8.0) * totalHoursForLabour;
                     }
 
                     totalProjectHours += totalHoursForLabour;
@@ -745,7 +859,7 @@ public class ContractorServiceImpl implements ContractorService {
                     .sum();
 
             Double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
-            Double billAmount = (ratePerDay / 7.0) * totalHours;
+            Double billAmount = (ratePerDay / 8.0) * totalHours;
 
             LabourBillingDetailsResponse dto = LabourBillingDetailsResponse.builder()
                     .labourId(labour.getId())

@@ -43,7 +43,7 @@ public class LabourServiceImpl implements LabourService {
                 .orElseThrow(() -> new RuntimeException("Labour type not found"));
 
         double ratePerDay = req.getRatePerDay() != null ? req.getRatePerDay() : 0.0;
-        double ratePerHour = ratePerDay > 0 ? ratePerDay / 7.0 : 0.0;
+        double ratePerHour = ratePerDay > 0 ? ratePerDay / 8.0 : 0.0;
 
         Labour labour = Labour.builder()
                 .labourName(req.getLabourName())
@@ -198,7 +198,7 @@ public class LabourServiceImpl implements LabourService {
         // ✅ ratePerDay and ratePerHour calculation
         if (labourRequest.getRatePerDay() != null) {
             double ratePerDay = labourRequest.getRatePerDay();
-            double ratePerHour = ratePerDay / 7.0;
+            double ratePerHour = ratePerDay / 8.0;
             existing.setRatePerDay(ratePerDay);
             existing.setRatePerHour(ratePerHour);
         }

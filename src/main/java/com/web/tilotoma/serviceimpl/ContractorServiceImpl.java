@@ -207,13 +207,38 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
 
-    //delete contractor
+  /*  //delete contractor
     public void deleteContractorDetails(Long contractorId) {
         Contractor contractor = contractorRepository.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
 
         contractorRepository.delete(contractor);
+    }*/
+
+    @Transactional
+    public void deleteContractorDetails(Long contractorId) {
+
+        Contractor contractor = contractorRepository.findById(contractorId)
+                .orElseThrow(() -> new RuntimeException("Contractor not found with ID: " + contractorId));
+
+        // Step 1: Remove contractor reference from projects
+        List<Project> projects = projectRepo.findProjectsByLabourContractor(contractor);
+        for (Project project : projects) {
+            project.setContractor(null);
+        }
+        projectRepo.saveAll(projects);
+
+        // Step 2: Remove contractor reference from labours
+        List<Labour> labours = labourRepository.findByContractor(contractor);
+        for (Labour labour : labours) {
+            labour.setContractor(null);
+        }
+        labourRepository.saveAll(labours);
+
+        // Step 3: Now safely delete contractor
+        contractorRepository.delete(contractor);
     }
+
 
     public List<ContractorProjectMonthlyReportDto> getMonthlyProjectReport(Long contractorId, int year, int month) {
         Contractor contractor = contractorRepository.findById(contractorId)

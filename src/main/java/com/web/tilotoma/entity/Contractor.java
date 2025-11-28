@@ -50,7 +50,9 @@ public class Contractor {
     @JsonManagedReference
     private List<Labour> labours;
 
-    @OneToMany(mappedBy = "contractor", cascade = CascadeType.ALL, orphanRemoval = false)
+   // @OneToMany(mappedBy = "contractor", cascade = CascadeType.ALL, orphanRemoval = false)
+
+    @OneToMany(mappedBy = "contractor", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = false)
     @JsonManagedReference
     private List<Project> projects;
 }

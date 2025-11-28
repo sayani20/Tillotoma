@@ -31,5 +31,5 @@ public class LabourAttendance {
     private Boolean isPresent = true;
 
     @Column(name = "is_check")
-    private Boolean isCheck = true;
+    private Boolean isCheck = false;
 }

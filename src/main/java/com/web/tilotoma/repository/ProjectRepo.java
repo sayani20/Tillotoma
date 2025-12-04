@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ProjectRepo extends JpaRepository<Project,Long> {
     List<Project> findByContractorId(Long contractorId);
-    List<Project> findByContractor(Contractor contractor);
+    //List<Project> findByContractor(Contractor contractor);
 
     // ✅ New query: fetch projects using labour-project relation
     @Query("""
@@ -21,4 +21,12 @@ public interface ProjectRepo extends JpaRepository<Project,Long> {
            WHERE l.contractor = :contractor
            """)
     List<Project> findProjectsByLabourContractor(@Param("contractor") Contractor contractor);
+
+    @Query("SELECT DISTINCT p FROM Labour l JOIN l.projects p WHERE l.contractor = :contractor")
+    List<Project> findProjectsByContractorViaLabours(@Param("contractor") Contractor contractor);
+
+
+    @Query("SELECT p FROM Project p WHERE p.contractor = :contractor")
+    List<Project> findByContractor(@Param("contractor") Contractor contractor);
+
 }

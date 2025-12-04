@@ -3,6 +3,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -22,4 +24,8 @@ public class ContractorBillingResponse {
     private Long projectId;
     private String projectName;
     private int totalLabours;
+
+    // 🔥 New fields
+    private String billNo;
+    private LocalDate billDate;
 }

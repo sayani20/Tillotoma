@@ -5,6 +5,7 @@ import com.web.tilotoma.dto.bill.ContractorBillingResponse;
 import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
 import com.web.tilotoma.entity.Contractor;
+import com.web.tilotoma.entity.ContractorPayment;
 import com.web.tilotoma.entity.LabourAttendance;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,5 +221,18 @@ public class ContractorController {
                 contractorService.getLabourBillingDetails(contractorId, projectId, fromDate, toDate);
 
         return ResponseEntity.ok(new ApiResponse<>(true, "Labour billing details fetched successfully", report));
+    }
+
+    @PostMapping("/payment/update")
+    public ApiResponse<String> updatePayment(@RequestBody PaymentRequest request) {
+        return contractorService.updateContractorPayment(request);
+    }
+
+    @GetMapping("/payment/history")
+    public ApiResponse<List<ContractorPayment>> getPaymentHistory(
+            @RequestParam("fromDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("toDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        return contractorService.getPaymentHistory(fromDate, toDate);
     }
 }

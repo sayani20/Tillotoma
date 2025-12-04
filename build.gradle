@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.web'
@@ -29,6 +30,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.+'
 	annotationProcessor 'org.projectlombok:lombok:1.18.+'
 	implementation 'org.mindrot:jbcrypt:0.4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 }
 

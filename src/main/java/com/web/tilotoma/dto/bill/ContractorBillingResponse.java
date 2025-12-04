@@ -28,4 +28,8 @@ public class ContractorBillingResponse {
     // 🔥 New fields
     private String billNo;
     private LocalDate billDate;
+
+    private Double paidAmount;
+    private String billStatus;
+
 }

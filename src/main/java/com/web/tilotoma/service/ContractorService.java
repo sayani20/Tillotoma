@@ -47,4 +47,9 @@ public interface ContractorService {
 
     String updateIsCheck(Long labourId, LocalDate attendanceDate, Boolean isCheck);
 
+
+    ApiResponse<String> updateContractorPayment(PaymentRequest request);
+
+    ApiResponse<List<ContractorPayment>> getPaymentHistory(LocalDate fromDate, LocalDate toDate);
+
 }

@@ -46,6 +46,9 @@ public class ContractorServiceImpl implements ContractorService {
     ContractorLabourRateRepository contractorLabourRateRepository;
 
 
+    @Autowired
+    ContractorPaymentRepository contractorPaymentRepository;
+
     //create contractor
     public Contractor addContractor(ContractorRequest req) {
 
@@ -638,49 +641,37 @@ public class ContractorServiceImpl implements ContractorService {
         List<ContractorBillingResponse> billingList = new ArrayList<>();
         List<Contractor> contractors = contractorRepository.findAll();
 
-        // Step 1: Collect all attendance dates inside range
-        List<LocalDate> attendanceDates = fromDate.datesUntil(toDate.plusDays(1))
-                .toList();
+        List<LocalDate> attendanceDates = fromDate.datesUntil(toDate.plusDays(1)).toList();
 
         for (LocalDate billDate : attendanceDates) {
 
-            System.out.println("\n=== Billing for Date: " + billDate + " ===");
-
             for (Contractor contractor : contractors) {
 
-                // Step 2: Find this contractor’s labours who worked on this date
                 List<LabourAttendance> dayAttendance =
                         attendanceRepository.findByLabour_Contractor_IdAndAttendanceDateBetween(
                                 contractor.getId(), billDate, billDate);
 
                 if (dayAttendance.isEmpty()) continue;
 
-                // Step 3: group attendance by project
                 Map<Project, List<LabourAttendance>> projectWiseMap = new HashMap<>();
 
                 for (LabourAttendance att : dayAttendance) {
                     if (!Boolean.TRUE.equals(att.getIsCheck())) continue;
 
-                    Labour labour = att.getLabour();
-
-                    for (Project p : labour.getProjects()) {
-
-                        projectWiseMap.computeIfAbsent(p, k -> new ArrayList<>())
-                                .add(att);
+                    for (Project p : att.getLabour().getProjects()) {
+                        projectWiseMap.computeIfAbsent(p, k -> new ArrayList<>()).add(att);
                     }
                 }
 
-                // Step 4: Now calculate billing project-wise
                 for (Map.Entry<Project, List<LabourAttendance>> entry : projectWiseMap.entrySet()) {
 
                     Project project = entry.getKey();
                     List<LabourAttendance> attendanceList = entry.getValue();
 
-                    double totalHours = 0.0;
-                    double totalAmount = 0.0;
+                    double totalHours = 0;
+                    double totalAmount = 0;
 
                     for (LabourAttendance att : attendanceList) {
-
                         Labour labour = att.getLabour();
 
                         if (att.getInTime() != null && att.getOutTime() != null &&
@@ -691,7 +682,7 @@ public class ContractorServiceImpl implements ContractorService {
                             totalHours += hrs;
 
                             Double ratePerDay = labour.getRatePerDay();
-                            double amount = 0.0;
+                            double amount = 0;
 
                             if (ratePerDay != null) {
                                 if (hrs >= 4 && hrs <= 5) amount = ratePerDay / 2.0;
@@ -700,18 +691,29 @@ public class ContractorServiceImpl implements ContractorService {
                                 else if (hrs >= 14 && hrs <= 15) amount = ratePerDay * 2.0;
                                 else amount = (ratePerDay / 8.0) * hrs;
                             }
-
                             totalAmount += amount;
                         }
                     }
 
                     if (totalHours == 0) continue;
 
-                    // Step 5: Generate bill number
+                    // 🔥 BILL NO GENERATION
                     String prefix = contractor.getContractorName().substring(0, 2).toUpperCase();
                     String billNo = prefix + billDate.format(DateTimeFormatter.ofPattern("ddMMyyyy"));
 
-                    // Step 6: Build response
+                    // 🔥 FETCH PAYMENT (IF EXISTS)
+                    Optional<ContractorPayment> paymentOpt =
+                            contractorPaymentRepository.findByContractorIdAndBillNo(contractor.getId(), billNo);
+
+                    Double paidAmount = 0.0;
+                    String billStatus = "NOT_PAID";
+
+                    if (paymentOpt.isPresent()) {
+                        ContractorPayment p = paymentOpt.get();
+                        paidAmount = p.getPaidAmount();
+                        billStatus = p.getStatus().name();
+                    }
+
                     ContractorBillingResponse res = ContractorBillingResponse.builder()
                             .contractorId(contractor.getId())
                             .contractorName(contractor.getContractorName())
@@ -724,6 +726,11 @@ public class ContractorServiceImpl implements ContractorService {
                             .totalLabours(attendanceList.size())
                             .billDate(billDate)
                             .billNo(billNo)
+
+                            // ⭐ NEW FIELDS
+                            .paidAmount(paidAmount)
+                            .billStatus(billStatus)
+
                             .build();
 
                     billingList.add(res);
@@ -733,11 +740,6 @@ public class ContractorServiceImpl implements ContractorService {
 
         return new ApiResponse<>(true, "Billing report fetched successfully", billingList);
     }
-
-
-
-
-
 
 
     @Override
@@ -821,6 +823,49 @@ public class ContractorServiceImpl implements ContractorService {
 
         return responseList;
     }
+
+    @Override
+    public ApiResponse<String> updateContractorPayment(PaymentRequest req) {
+
+        Contractor contractor = contractorRepository.findById(req.getContractorId())
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        // Auto status calculation
+        PaymentStatus status;
+
+        if (req.getPaidAmount() == 0) {
+            status = PaymentStatus.NOT_PAID;
+        } else if (req.getPaidAmount() < req.getTotalAmount()) {
+            status = PaymentStatus.PARTIALLY_PAID;
+        } else {
+            status = PaymentStatus.FULL_PAID;
+        }
+
+        ContractorPayment payment = ContractorPayment.builder()
+                .contractor(contractor)
+                .billNo(req.getBillNo())
+                .billDate(req.getBillDate())
+                .totalAmount(req.getTotalAmount())
+                .paidAmount(req.getPaidAmount())
+                .paymentDate(LocalDate.now())
+                .remarks(req.getRemarks())
+                .status(status)   // ⭐ NEW: Set status here
+                .build();
+
+        contractorPaymentRepository.save(payment);
+
+        return new ApiResponse<>(true, "Payment updated successfully", null);
+    }
+
+    @Override
+    public ApiResponse<List<ContractorPayment>> getPaymentHistory(LocalDate fromDate, LocalDate toDate) {
+
+        List<ContractorPayment> history =
+                contractorPaymentRepository.findByBillDateBetween(fromDate, toDate);
+
+        return new ApiResponse<>(true, "Payment history fetched successfully", history);
+    }
+
 
 
 

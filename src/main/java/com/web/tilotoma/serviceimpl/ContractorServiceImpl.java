@@ -828,60 +828,82 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     public ApiResponse<String> updateContractorPayment(PaymentRequest req) {
 
-        Contractor contractor = contractorRepository.findById(req.getContractorId())
-                .orElseThrow(() -> new RuntimeException("Contractor not found"));
-
-        // Auto status calculation
+        // Auto status calculation function
         PaymentStatus status;
 
-        if (req.getPaidAmount() == 0) {
+        // Existing payment search by billNo
+        ContractorPayment payment = contractorPaymentRepository
+                .findByBillNo(req.getBillNo())
+                .orElse(null);
+
+        if (payment == null) {
+            // New Insert
+            payment = new ContractorPayment();
+            payment.setBillNo(req.getBillNo());
+            payment.setContractor(contractorRepository.findById(req.getContractorId()).orElse(null));
+
+
+            // প্রথম বার paidAmount সেট হবে সরাসরি
+            payment.setPaidAmount(req.getPaidAmount());
+        } else {
+            // Existing → paid amount add হবে
+            double newPaidAmount = payment.getPaidAmount() + req.getPaidAmount();
+            payment.setPaidAmount(newPaidAmount);
+        }
+
+        // Fixed fields update
+        payment.setBillDate(req.getBillDate());
+        payment.setTotalAmount(req.getTotalAmount());
+        payment.setPaymentDate(LocalDate.now());
+        payment.setRemarks(req.getRemarks());
+
+        // Auto payment status check
+        if (payment.getPaidAmount() == 0) {
             status = PaymentStatus.NOT_PAID;
-        } else if (req.getPaidAmount() < req.getTotalAmount()) {
+        } else if (payment.getPaidAmount() < payment.getTotalAmount()) {
             status = PaymentStatus.PARTIALLY_PAID;
         } else {
             status = PaymentStatus.FULL_PAID;
         }
 
-        ContractorPayment payment = ContractorPayment.builder()
-                .contractor(contractor)
-                .billNo(req.getBillNo())
-                .billDate(req.getBillDate())
-                .totalAmount(req.getTotalAmount())
-                .paidAmount(req.getPaidAmount())
-                .paymentDate(LocalDate.now())
-                .remarks(req.getRemarks())
-                .status(status)   // ⭐ NEW: Set status here
-                .build();
+        payment.setStatus(status);
 
         contractorPaymentRepository.save(payment);
 
         return new ApiResponse<>(true, "Payment updated successfully", null);
     }
 
+
     @Override
     public ApiResponse<List<ContractorPaymentResponse>> getPaymentHistory(LocalDate fromDate, LocalDate toDate) {
 
+        // Fetch payments between date range
         List<ContractorPayment> list =
                 contractorPaymentRepository.findByBillDateBetween(fromDate, toDate);
 
         List<ContractorPaymentResponse> response = list.stream()
                 .map(p -> ContractorPaymentResponse.builder()
-                        .contractorId(p.getContractor().getId())
-                        .contractorName(p.getContractor().getContractorName())
+                        .contractorId(
+                                p.getContractor() != null ? p.getContractor().getId() : null
+                        )
+                        .contractorName(
+                                p.getContractor() != null ? p.getContractor().getContractorName() : null
+                        )
                         .billNo(p.getBillNo())
                         .billDate(p.getBillDate())
                         .totalAmount(p.getTotalAmount())
                         .paidAmount(p.getPaidAmount())
-                        .status(p.getStatus().name())
+                        .status(p.getStatus() != null ? p.getStatus().name() : "UNKNOWN")
                         .paymentDate(p.getPaymentDate())
                         .remarks(p.getRemarks())
                         .build()
                 )
+                // ⭐ Sort by most recent billDate
+                .sorted(Comparator.comparing(ContractorPaymentResponse::getBillDate).reversed())
                 .toList();
 
         return new ApiResponse<>(true, "Payment history fetched successfully", response);
     }
-
 
 
 

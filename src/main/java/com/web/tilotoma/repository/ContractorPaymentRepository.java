@@ -20,5 +20,6 @@ public interface ContractorPaymentRepository extends JpaRepository<ContractorPay
     List<ContractorPayment> findByContractorIdAndBillDateBetween(Long contractorId, LocalDate start, LocalDate end);
 
     Optional<ContractorPayment> findByContractorIdAndBillNo(Long contractorId, String billNo);
+    Optional<ContractorPayment> findByBillNo(String billNo);
 
 }

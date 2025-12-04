@@ -464,6 +464,7 @@ public class ContractorServiceImpl implements ContractorService {
                         .labourId(labour.getId())
                         .labourName(labour.getLabourName())
                         .labourUserId(labour.getLabourUserId())
+                        .ratePerDay(labour.getRatePerDay())
                         .labourType(
                                 ContractorAttendanceReportDto.LabourTypeDto.builder()
                                         .id(labour.getLabourType().getId())
@@ -858,13 +859,29 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     @Override
-    public ApiResponse<List<ContractorPayment>> getPaymentHistory(LocalDate fromDate, LocalDate toDate) {
+    public ApiResponse<List<ContractorPaymentResponse>> getPaymentHistory(LocalDate fromDate, LocalDate toDate) {
 
-        List<ContractorPayment> history =
+        List<ContractorPayment> list =
                 contractorPaymentRepository.findByBillDateBetween(fromDate, toDate);
 
-        return new ApiResponse<>(true, "Payment history fetched successfully", history);
+        List<ContractorPaymentResponse> response = list.stream()
+                .map(p -> ContractorPaymentResponse.builder()
+                        .contractorId(p.getContractor().getId())
+                        .contractorName(p.getContractor().getContractorName())
+                        .billNo(p.getBillNo())
+                        .billDate(p.getBillDate())
+                        .totalAmount(p.getTotalAmount())
+                        .paidAmount(p.getPaidAmount())
+                        .status(p.getStatus().name())
+                        .paymentDate(p.getPaymentDate())
+                        .remarks(p.getRemarks())
+                        .build()
+                )
+                .toList();
+
+        return new ApiResponse<>(true, "Payment history fetched successfully", response);
     }
+
 
 
 

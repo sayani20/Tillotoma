@@ -229,7 +229,7 @@ public class ContractorController {
     }
 
     @GetMapping("/payment/history")
-    public ApiResponse<List<ContractorPayment>> getPaymentHistory(
+    public ApiResponse<List<ContractorPaymentResponse>> getPaymentHistory(
             @RequestParam("fromDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam("toDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 

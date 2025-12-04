@@ -50,6 +50,6 @@ public interface ContractorService {
 
     ApiResponse<String> updateContractorPayment(PaymentRequest request);
 
-    ApiResponse<List<ContractorPayment>> getPaymentHistory(LocalDate fromDate, LocalDate toDate);
+    ApiResponse<List<ContractorPaymentResponse>> getPaymentHistory(LocalDate fromDate, LocalDate toDate);
 
 }

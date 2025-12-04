@@ -17,6 +17,7 @@ public class ContractorAttendanceReportDto {
     private Long labourId;
     private String labourName;
     private String labourUserId;
+    private Double ratePerDay;
     private LabourTypeDto labourType;
     private List<ProjectDto> projects;
 

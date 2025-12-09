@@ -36,7 +36,7 @@ public class LabourServiceImpl implements LabourService {
     ContractorRepository contractorRepo;
 
 
-    public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
+    /*public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
         Contractor contractor = contractorRepository.findById(req.getContractorId())
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
         LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
@@ -80,7 +80,62 @@ public class LabourServiceImpl implements LabourService {
 
         // STEP 3: Save again with userId
         return labourRepo.save(saved);
+    }*/
+
+
+    public Labour addLabourUnderContractor(Long contractorId, LabourRequest req) {
+
+        // STEP 1: Fetch Contractor & LabourType
+        Contractor contractor = contractorRepository.findById(req.getContractorId())
+                .orElseThrow(() -> new RuntimeException("Contractor not found"));
+
+        LabourType labourType = labourTypeRepository.findById(req.getLabourTypeId())
+                .orElseThrow(() -> new RuntimeException("Labour type not found"));
+
+        // STEP 2: Rate calculations
+        double ratePerDay = req.getRatePerDay() != null ? req.getRatePerDay() : 0.0;
+        double ratePerHour = ratePerDay > 0 ? ratePerDay / 8.0 : 0.0;
+
+        // STEP 3: Create Labour object (without userId)
+        Labour labour = Labour.builder()
+                .labourName(req.getLabourName())
+                .email(req.getEmail())
+                .mobileNumber(req.getMobileNumber())
+                .contractor(contractor)
+                .labourType(labourType)
+                .ratePerDay(ratePerDay)
+                .ratePerHour(ratePerHour)
+                .address(req.getAddress())
+                .aadharNumber(req.getAadharNumber())
+                .isActive(true)
+                .build();
+
+        // STEP 4: Add Projects
+        if (req.getProjectIds() != null && !req.getProjectIds().isEmpty()) {
+            List<Project> projects = projectRepo.findAllById(req.getProjectIds());
+            labour.setProjects(projects);
+        }
+
+        // STEP 5: Save first time to generate auto ID
+        Labour saved = labourRepo.save(labour);
+
+        // STEP 6: Generate LabourUserId using CONTRACTOR name
+        String contractorName = contractor.getContractorName();
+
+        String namePart = contractorName.length() >= 3
+                ? contractorName.substring(0, 3).toLowerCase()
+                : contractorName.toLowerCase();
+
+        String idPart = String.format("%03d", saved.getId());
+
+        String userId = namePart + idPart;   // Example: til002
+
+        saved.setLabourUserId(userId);
+
+        // STEP 7: Save again with userId
+        return labourRepo.save(saved);
     }
+
 
     @Transactional(readOnly = true)
     public List<LabourResponse> getAllLabours() {

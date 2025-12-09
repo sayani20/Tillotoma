@@ -32,4 +32,13 @@ public class LabourAttendance {
 
     @Column(name = "is_check")
     private Boolean isCheck = false;
+
+
+    // NEW: store system computed amount (immutable after compute unless recompute)
+    @Column(name = "calculated_amount")
+    private Double calculatedAmount;
+
+    // NEW: admin-editable amount (initially same as calculatedAmount)
+    @Column(name = "custom_amount")
+    private Double customAmount;
 }

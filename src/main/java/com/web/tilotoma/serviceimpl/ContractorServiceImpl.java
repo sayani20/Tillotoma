@@ -638,7 +638,7 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     public ApiResponse<List<ContractorBillingResponse>> getBillingReport(LocalDate fromDate, LocalDate toDate) {
 
-        Lis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       t<ContractorBillingResponse> billingList = new ArrayList<>();
+        List<ContractorBillingResponse> billingList = new ArrayList<>();
         List<Contractor> contractors = contractorRepository.findAll();
 
         List<LocalDate> attendanceDates = fromDate.datesUntil(toDate.plusDays(1)).toList();

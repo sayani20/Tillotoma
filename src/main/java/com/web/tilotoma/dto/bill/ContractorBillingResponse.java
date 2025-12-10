@@ -32,4 +32,7 @@ public class ContractorBillingResponse {
     private Double paidAmount;
     private String billStatus;
 
+    private Double finalBalance;
+
+
 }

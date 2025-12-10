@@ -119,22 +119,23 @@ public class LabourServiceImpl implements LabourService {
         // STEP 5: Save first time to generate auto ID
         Labour saved = labourRepo.save(labour);
 
-        // STEP 6: Generate LabourUserId using CONTRACTOR name
-        String contractorName = contractor.getContractorName();
+        // STEP 6: Generate LabourUserId using LABOUR TYPE name
+        String typeName = labourType.getTypeName();  // assuming getName() exists
 
-        String namePart = contractorName.length() >= 3
-                ? contractorName.substring(0, 3).toLowerCase()
-                : contractorName.toLowerCase();
+        String namePart = typeName.length() >= 3
+                ? typeName.substring(0, 3).toLowerCase()
+                : typeName.toLowerCase();
 
-        String idPart = String.format("%03d", saved.getId());
+        String idPart = String.format("%03d", saved.getId()); // 001, 002, 010 etc.
 
-        String userId = namePart + idPart;   // Example: til002
+        String userId = namePart + "00" + idPart;  // Example: plu00001
 
         saved.setLabourUserId(userId);
 
         // STEP 7: Save again with userId
         return labourRepo.save(saved);
     }
+
 
 
     @Transactional(readOnly = true)

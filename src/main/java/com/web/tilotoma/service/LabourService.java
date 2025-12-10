@@ -8,6 +8,7 @@ import com.web.tilotoma.dto.response.LabourResponseDto;
 import com.web.tilotoma.entity.Labour;
 import com.web.tilotoma.entity.LabourType;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LabourService {
@@ -34,6 +35,7 @@ public interface LabourService {
     LabourType updateLabourType(Long id, LabourTypeRequest req);
     LabourType toggleLabourTypeStatus(Long id, boolean isActive);
     String deleteLabourType(Long id);
+    String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount);
 
 
 }

@@ -53,6 +53,9 @@ public class ContractorAttendanceReportDto {
         private Boolean isCheck;
         private Long durationMinutes;
         private Double todayBillAmount;
+        private Double calculatedAmount;
+        private Double customAmount;
+
 
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/labour")
@@ -205,4 +206,22 @@ public class LabourController {
                     .body(new ApiResponse<>(false, "Failed to delete labour type", null));
         }
     }
+    @PostMapping("/updateCustomAmount")
+    public ResponseEntity<?> updateCustomAmount(@RequestBody UpdateCustomAmountRequest req) {
+
+        String msg = labourService.updateCustomAmount(
+                req.getLabourId(),
+                req.getAttendanceDate(),
+                req.getCustomAmount()
+        );
+
+        return ResponseEntity.ok(Map.of(
+                "status", true,
+                "message", msg
+        ));
+    }
+
+
+
+
 }

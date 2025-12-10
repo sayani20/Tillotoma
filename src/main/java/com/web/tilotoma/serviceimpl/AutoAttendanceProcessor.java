@@ -71,6 +71,30 @@ public class AutoAttendanceProcessor {
                 computedIsCheck = false;
             }
 
+            Double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
+            double billAmount = 0.0;
+
+            if (ratePerDay > 0 && hours > 0) {
+
+                double h = hours;
+
+                if (h >= 4.0 && h <= 5.0) {
+                    billAmount = ratePerDay / 2.0;
+
+                } else if (h >= 8.0 && h <= 9.0) {
+                    billAmount = ratePerDay;
+
+                } else if (h >= 11.0 && h <= 12.0) {
+                    billAmount = ratePerDay * 1.5;
+
+                } else if (h >= 14.0 && h <= 15.0) {
+                    billAmount = ratePerDay * 2.0;
+
+                } else {
+                    billAmount = (ratePerDay / 8.0) * h;
+                }
+            }
+
             // ====================== SAVE ATTENDANCE ======================
             Optional<LabourAttendance> existing =
                     attendanceRepo.findByLabourAndAttendanceDate(labour, today);
@@ -79,23 +103,35 @@ public class AutoAttendanceProcessor {
 
             if (existing.isPresent()) {
                 att = existing.get();
+
                 att.setInTime(inTime);
                 att.setOutTime(outTime);
-                att.setIsCheck(computedIsCheck);   // <<==== NEW
+                att.setIsCheck(computedIsCheck);
+
+                // Update calculated amount (system generated)
+                att.setCalculatedAmount(billAmount);
+
+                // If custom amount is NULL keep it equal to calculated amount
+                if (att.getCustomAmount() == null) {
+                    att.setCustomAmount(billAmount);
+                }
+
             } else {
+
                 att = LabourAttendance.builder()
                         .labour(labour)
                         .attendanceDate(today)
                         .inTime(inTime)
                         .outTime(outTime)
                         .isPresent(true)
-                        .isCheck(computedIsCheck)   // <<==== NEW
+                        .isCheck(computedIsCheck)
+                        .calculatedAmount(billAmount)
+                        .customAmount(billAmount)  // initially same as calculated
                         .build();
             }
 
             attendanceRepo.save(att);
         }
-
         System.out.println("Auto Attendance Processing Done For " + today);
     }
 

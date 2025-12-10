@@ -373,4 +373,18 @@ public class LabourServiceImpl implements LabourService {
         return "Labour type deleted successfully with ID: " + id;
     }
 
+    public String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount) {
+
+        LabourAttendance att = attendanceRepo
+                .findByLabourIdAndAttendanceDate(labourId, attendanceDate)
+                .orElseThrow(() ->
+                        new RuntimeException("Attendance record not found for labour ID: " + labourId));
+
+        att.setCustomAmount(customAmount);
+
+        attendanceRepo.save(att);
+
+        return "Custom amount updated successfully";
+    }
+
 }

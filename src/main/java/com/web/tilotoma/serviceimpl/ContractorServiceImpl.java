@@ -517,6 +517,7 @@ public class ContractorServiceImpl implements ContractorService {
                         .orElseThrow(() -> new RuntimeException("Attendance record not found"));
 
         attendance.setIsCheck(isCheck);
+        attendance.setIsCheckManuallyUpdated(true);
         attendanceRepository.save(attendance);
 
         return "isCheck updated successfully";

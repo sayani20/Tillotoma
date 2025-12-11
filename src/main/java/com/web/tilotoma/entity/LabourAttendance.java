@@ -41,4 +41,9 @@ public class LabourAttendance {
     // NEW: admin-editable amount (initially same as calculatedAmount)
     @Column(name = "custom_amount")
     private Double customAmount;
+
+    private Boolean isCheckManuallyUpdated = false;
+
+    private Boolean isCustomUpdated = false;
+
 }

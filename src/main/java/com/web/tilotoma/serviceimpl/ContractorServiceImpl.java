@@ -525,11 +525,6 @@ public class ContractorServiceImpl implements ContractorService {
 
     //--------------------------Report END-----------------------//
 
-
-
-
-
-
    /* @Override
     public ApiResponse<List<ContractorBillingResponse>> getBillingReport(LocalDate fromDate, LocalDate toDate) {
 

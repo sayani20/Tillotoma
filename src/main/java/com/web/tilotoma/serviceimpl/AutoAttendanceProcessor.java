@@ -95,12 +95,12 @@ public class AutoAttendanceProcessor {
 
                 att.setInTime(inTime);
                 att.setOutTime(outTime);
-                att.setCalculatedAmount(billAmount);
+                //att.setCalculatedAmount(billAmount);
 
                 // ❗ Custom amount overwrite করব না যদি admin change করে থাকে
-                if (att.getIsCustomUpdated() == null || !att.getIsCustomUpdated()) {
+                /*if (att.getIsCustomUpdated() == null || !att.getIsCustomUpdated()) {
                     att.setCustomAmount(billAmount);
-                }
+                }*/
 
                 // ❗ isCheck overwrite করব না যদি admin change করে থাকে
                 if (att.getIsCheckManuallyUpdated() == null || !att.getIsCheckManuallyUpdated()) {
@@ -116,7 +116,7 @@ public class AutoAttendanceProcessor {
                         .outTime(outTime)
                         .isPresent(true)
                         .calculatedAmount(billAmount)
-                        .customAmount(billAmount)
+                        .customAmount(0.00)
                         .isCheck(computedIsCheck)
                         .build();
             }

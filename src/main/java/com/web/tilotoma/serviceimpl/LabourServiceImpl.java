@@ -381,6 +381,7 @@ public class LabourServiceImpl implements LabourService {
                         new RuntimeException("Attendance record not found for labour ID: " + labourId));
 
         att.setCustomAmount(customAmount);
+        att.setCalculatedAmount(customAmount);
         att.setIsCustomUpdated(true);
 
         attendanceRepo.save(att);

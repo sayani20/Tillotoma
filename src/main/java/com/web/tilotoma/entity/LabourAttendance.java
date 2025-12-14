@@ -45,5 +45,7 @@ public class LabourAttendance {
     private Boolean isCheckManuallyUpdated = false;
 
     private Boolean isCustomUpdated = false;
+    private String paymentMethod;
+    private String remarks;
 
 }

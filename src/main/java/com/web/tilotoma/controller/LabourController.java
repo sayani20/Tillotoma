@@ -212,7 +212,9 @@ public class LabourController {
         String msg = labourService.updateCustomAmount(
                 req.getLabourId(),
                 req.getAttendanceDate(),
-                req.getCustomAmount()
+                req.getCustomAmount(),
+                req.getPaymentMethod(),
+                req.getRemarks()
         );
 
         return ResponseEntity.ok(Map.of(

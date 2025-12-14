@@ -808,6 +808,7 @@ public class ContractorServiceImpl implements ContractorService {
 
                     double totalHours = 0;
                     double totalAmount = 0;
+                    List<UpdateCustomAmountRequest> labourDetails = new ArrayList<>();
 
                     for (LabourAttendance att : attendanceList) {
 
@@ -848,6 +849,16 @@ public class ContractorServiceImpl implements ContractorService {
                             }
 
                             totalAmount += amount;
+                            UpdateCustomAmountRequest detail =
+                                    UpdateCustomAmountRequest.builder()
+                                            .labourId(labour.getId())
+                                            .attendanceDate(att.getAttendanceDate())
+                                            .customAmount(att.getCustomAmount())
+                                            .paymentMethod(att.getPaymentMethod())
+                                            .remarks(att.getRemarks())
+                                            .build();
+
+                            labourDetails.add(detail);
                         }
                     }
 
@@ -884,6 +895,7 @@ public class ContractorServiceImpl implements ContractorService {
                             .billNo(billNo)
                             .paidAmount(paidAmount)
                             .billStatus(billStatus)
+                            .labourDetails(labourDetails)
                             .build();
 
                     billingList.add(res);

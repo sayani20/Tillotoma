@@ -373,7 +373,7 @@ public class LabourServiceImpl implements LabourService {
         return "Labour type deleted successfully with ID: " + id;
     }
 
-    public String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount) {
+    public String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount,String paymentMethod, String remarks) {
 
         LabourAttendance att = attendanceRepo
                 .findByLabourIdAndAttendanceDate(labourId, attendanceDate)
@@ -383,6 +383,8 @@ public class LabourServiceImpl implements LabourService {
         att.setCustomAmount(customAmount);
         att.setCalculatedAmount(customAmount);
         att.setIsCustomUpdated(true);
+        att.setRemarks(remarks);
+        att.setPaymentMethod(paymentMethod);
 
         attendanceRepo.save(att);
 

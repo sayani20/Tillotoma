@@ -35,7 +35,7 @@ public interface LabourService {
     LabourType updateLabourType(Long id, LabourTypeRequest req);
     LabourType toggleLabourTypeStatus(Long id, boolean isActive);
     String deleteLabourType(Long id);
-    String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount);
+    String updateCustomAmount(Long labourId, LocalDate attendanceDate, Double customAmount,String paymentMethod, String remarks);
 
 
 }

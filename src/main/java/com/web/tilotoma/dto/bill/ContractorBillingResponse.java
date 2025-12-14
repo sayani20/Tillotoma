@@ -1,4 +1,5 @@
 package com.web.tilotoma.dto.bill;
+import com.web.tilotoma.dto.UpdateCustomAmountRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +34,8 @@ public class ContractorBillingResponse {
     private String billStatus;
 
     private Double finalBalance;
+
+    private List<UpdateCustomAmountRequest> labourDetails;
 
 
 }

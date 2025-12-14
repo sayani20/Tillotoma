@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -25,4 +26,6 @@ public class ContractorPaymentResponse {
     private LocalDate paymentDate;
 
     private String remarks;
+
+    private List<ContractorPaymentHistoryResponse> paymentHistories;
 }

@@ -11,4 +11,6 @@ public class PaymentRequest {
     private Double totalAmount;
     private Double paidAmount;
     private String remarks;
+    private String paymentMethod;
+
 }

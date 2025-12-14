@@ -50,11 +50,13 @@ public class ContractorAttendanceReportDto {
         private LocalTime inTime;
         private LocalTime outTime;
         private Boolean isPresent;
+        private Boolean isCustomCheck;
         private Boolean isCheck;
         private Long durationMinutes;
         private Double todayBillAmount;
         private Double calculatedAmount;
         private Double customAmount;
+
 
 
     }

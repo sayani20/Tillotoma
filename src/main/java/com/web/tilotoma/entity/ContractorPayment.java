@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "contractor_payments")
@@ -48,6 +50,13 @@ public class ContractorPayment {
     private String remarks;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false , length = 30)
     private PaymentStatus status;
+
+    @OneToMany(
+            mappedBy = "contractorPayment",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ContractorPaymentHistory> paymentHistories = new ArrayList<>();
 }

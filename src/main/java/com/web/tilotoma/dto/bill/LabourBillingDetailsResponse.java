@@ -3,6 +3,8 @@ package com.web.tilotoma.dto.bill;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class LabourBillingDetailsResponse {
     private Double totalHours;
     private Double ratePerDay;
     private Double billAmount;
+    private LocalDate attendanceDate;
 }

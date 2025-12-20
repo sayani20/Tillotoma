@@ -722,92 +722,98 @@ public class ContractorServiceImpl implements ContractorService {
         List<Labour> labours = labourRepository.findByProjects(project);
 
         List<LabourBillingDetailsResponse> responseList = new ArrayList<>();
+        LocalDate current = fromDate;
 
-        for (Labour labour : labours) {
+        while (!current.isAfter(toDate)) {
 
-            if (!labour.getContractor().getId().equals(contractorId)) continue;
+            for (Labour labour : labours) {
 
-            List<LabourAttendance> attendances = attendanceRepository
-                    .findByLabourAndAttendanceDateBetween(labour, fromDate, toDate);
+                if (!labour.getContractor().getId().equals(contractorId)) continue;
 
-            boolean hasCheckedAttendance = attendances.stream()
-                    .anyMatch(a -> Boolean.TRUE.equals(a.getIsCheck()));
+                List<LabourAttendance> attendances = attendanceRepository
+                        .findByLabourAndAttendanceDateBetween(labour, current, current);
 
-            if (!hasCheckedAttendance) continue;
+                boolean hasCheckedAttendance = attendances.stream()
+                        .anyMatch(a -> Boolean.TRUE.equals(a.getIsCheck()));
 
-            long totalDays = attendances.stream()
-                    .filter(LabourAttendance::getIsPresent)
-                    .count();
+                if (!hasCheckedAttendance) continue;
 
-            double totalHours = attendances.stream()
-                    .mapToDouble(a -> {
-                        if (a.getInTime() != null && a.getOutTime() != null &&
-                                !a.getOutTime().isBefore(a.getInTime())) {
-                            return Duration.between(a.getInTime(), a.getOutTime())
-                                    .toMinutes() / 60.0;
-                        }
-                        return 0.0;
-                    })
-                    .sum();
+                long totalDays = attendances.stream()
+                        .filter(LabourAttendance::getIsPresent)
+                        .count();
 
-            Double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
+                double totalHours = attendances.stream()
+                        .mapToDouble(a -> {
+                            if (a.getInTime() != null && a.getOutTime() != null &&
+                                    !a.getOutTime().isBefore(a.getInTime())) {
+                                return Duration.between(a.getInTime(), a.getOutTime())
+                                        .toMinutes() / 60.0;
+                            }
+                            return 0.0;
+                        })
+                        .sum();
 
-            double billAmount = 0.0;
+                Double ratePerDay = labour.getRatePerDay() != null ? labour.getRatePerDay() : 0.0;
 
-            // 💥 NEW: TAKE AMOUNT FROM ATTENDANCE (custom → calculated → fresh compute)
-            double totalFinalAmount = 0;
+                double billAmount = 0.0;
 
-            for (LabourAttendance a : attendances) {
+                // 💥 NEW: TAKE AMOUNT FROM ATTENDANCE (custom → calculated → fresh compute)
+                double totalFinalAmount = 0;
 
-                if (!Boolean.TRUE.equals(a.getIsCheck())) continue;
+                for (LabourAttendance a : attendances) {
 
-                double hrs = 0;
-                if (a.getInTime() != null && a.getOutTime() != null &&
-                        !a.getOutTime().isBefore(a.getInTime())) {
-                    hrs = Duration.between(a.getInTime(), a.getOutTime()).toMinutes() / 60.0;
-                }
+                    if (!Boolean.TRUE.equals(a.getIsCheck())) continue;
 
-                double amount = 0;
-
-                // PRIORITY 1: Admin customAmount (> 0)
-                if (a.getCustomAmount() != null && a.getCustomAmount() > 0) {
-                    amount = a.getCustomAmount();
-                }
-                // PRIORITY 2: System calculatedAmount (> 0)
-                else if (a.getCalculatedAmount() != null && a.getCalculatedAmount() > 0) {
-                    amount = a.getCalculatedAmount();
-                }
-                // PRIORITY 3: Fresh calculation
-                else {
-                    if (ratePerDay > 0 && hrs > 0) {
-                        if (hrs >= 4 && hrs <= 5) amount = ratePerDay / 2.0;
-                        else if (hrs >= 8 && hrs <= 9) amount = ratePerDay;
-                        else if (hrs >= 11 && hrs <= 12) amount = ratePerDay * 1.5;
-                        else if (hrs >= 14 && hrs <= 15) amount = ratePerDay * 2.0;
-                        else amount = (ratePerDay / 8.0) * hrs;
+                    double hrs = 0;
+                    if (a.getInTime() != null && a.getOutTime() != null &&
+                            !a.getOutTime().isBefore(a.getInTime())) {
+                        hrs = Duration.between(a.getInTime(), a.getOutTime()).toMinutes() / 60.0;
                     }
 
-                    // ✅ Only system field set
-                    a.setCalculatedAmount(amount);
-                    // ❌ customAmount এখানে সেট করবো না
+                    double amount = 0;
+
+                    // PRIORITY 1: Admin customAmount (> 0)
+                    if (a.getCustomAmount() != null && a.getCustomAmount() > 0) {
+                        amount = a.getCustomAmount();
+                    }
+                    // PRIORITY 2: System calculatedAmount (> 0)
+                    else if (a.getCalculatedAmount() != null && a.getCalculatedAmount() > 0) {
+                        amount = a.getCalculatedAmount();
+                    }
+                    // PRIORITY 3: Fresh calculation
+                    else {
+                        if (ratePerDay > 0 && hrs > 0) {
+                            if (hrs >= 4 && hrs <= 5) amount = ratePerDay / 2.0;
+                            else if (hrs >= 8 && hrs <= 9) amount = ratePerDay;
+                            else if (hrs >= 11 && hrs <= 12) amount = ratePerDay * 1.5;
+                            else if (hrs >= 14 && hrs <= 15) amount = ratePerDay * 2.0;
+                            else amount = (ratePerDay / 8.0) * hrs;
+                        }
+
+                        // ✅ Only system field set
+                        a.setCalculatedAmount(amount);
+                        // ❌ customAmount এখানে সেট করবো না
+                    }
+
+                    totalFinalAmount += amount;
                 }
 
-                totalFinalAmount += amount;
+                billAmount = totalFinalAmount;
+
+                LabourBillingDetailsResponse dto = LabourBillingDetailsResponse.builder()
+                        .labourId(labour.getId())
+                        .labourName(labour.getLabourName())
+                        .labourType(labour.getLabourType().getTypeName())
+                        .totalDays(totalDays)
+                        .totalHours(round(totalHours))
+                        .ratePerDay(ratePerDay)
+                        .billAmount(round(billAmount))
+                        .attendanceDate(current)
+                        .build();
+
+                responseList.add(dto);
             }
-
-            billAmount = totalFinalAmount;
-
-            LabourBillingDetailsResponse dto = LabourBillingDetailsResponse.builder()
-                    .labourId(labour.getId())
-                    .labourName(labour.getLabourName())
-                    .labourType(labour.getLabourType().getTypeName())
-                    .totalDays(totalDays)
-                    .totalHours(round(totalHours))
-                    .ratePerDay(ratePerDay)
-                    .billAmount(round(billAmount))
-                    .build();
-
-            responseList.add(dto);
+            current = current.plusDays(1);
         }
 
         return responseList;

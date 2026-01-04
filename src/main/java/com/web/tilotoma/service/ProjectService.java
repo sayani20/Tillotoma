@@ -1,8 +1,7 @@
 package com.web.tilotoma.service;
 
 import com.web.tilotoma.dto.ProjectDto;
-import com.web.tilotoma.entity.Project;
-import org.springframework.stereotype.Service;
+import com.web.tilotoma.entity.labour.Project;
 
 import java.util.List;
 

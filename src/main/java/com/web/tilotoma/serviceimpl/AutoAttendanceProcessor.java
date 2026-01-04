@@ -4,9 +4,9 @@
 
 package com.web.tilotoma.serviceimpl;
 
-import com.web.tilotoma.entity.AttendanceRaw;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourAttendance;
+import com.web.tilotoma.entity.labour.AttendanceRaw;
+import com.web.tilotoma.entity.labour.Labour;
+import com.web.tilotoma.entity.labour.LabourAttendance;
 import com.web.tilotoma.repository.AttendanceRawRepository;
 import com.web.tilotoma.repository.LabourAttendanceRepository;
 import com.web.tilotoma.repository.LabourRepository;
@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AutoAttendanceProcessor {

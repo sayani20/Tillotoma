@@ -1,4 +1,4 @@
-package com.web.tilotoma.entity;
+package com.web.tilotoma.entity.labour;
 
 public enum PaymentStatus {
     OVER_PAID,

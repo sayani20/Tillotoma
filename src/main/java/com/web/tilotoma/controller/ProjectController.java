@@ -2,7 +2,7 @@ package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.ProjectDto;
-import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.entity.labour.Project;
 import com.web.tilotoma.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

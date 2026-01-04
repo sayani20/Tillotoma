@@ -5,8 +5,8 @@ import com.web.tilotoma.dto.LabourRequest;
 import com.web.tilotoma.dto.LabourResponse;
 import com.web.tilotoma.dto.LabourTypeRequest;
 import com.web.tilotoma.dto.response.LabourResponseDto;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.entity.labour.Labour;
+import com.web.tilotoma.entity.labour.LabourType;
 
 import java.time.LocalDate;
 import java.util.List;

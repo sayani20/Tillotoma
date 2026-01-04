@@ -4,21 +4,12 @@ import com.web.tilotoma.dto.*;
 import com.web.tilotoma.dto.bill.ContractorBillingResponse;
 import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
-import com.web.tilotoma.entity.*;
 
-import com.web.tilotoma.exceptions.ResourceNotFoundException;
-import com.web.tilotoma.repository.ContractorRepository;
-import com.web.tilotoma.repository.LabourAttendanceRepository;
-import com.web.tilotoma.repository.LabourRepository;
-import com.web.tilotoma.repository.LabourTypeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.web.tilotoma.entity.labour.Contractor;
+import com.web.tilotoma.entity.labour.LabourAttendance;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 
 public interface ContractorService {

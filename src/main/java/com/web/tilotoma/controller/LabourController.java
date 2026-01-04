@@ -2,8 +2,8 @@ package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.*;
 import com.web.tilotoma.dto.response.LabourResponseDto;
-import com.web.tilotoma.entity.Labour;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.entity.labour.Labour;
+import com.web.tilotoma.entity.labour.LabourType;
 import com.web.tilotoma.service.LabourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

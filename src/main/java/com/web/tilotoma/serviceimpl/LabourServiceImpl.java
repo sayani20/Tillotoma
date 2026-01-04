@@ -2,8 +2,7 @@ package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.*;
 import com.web.tilotoma.dto.response.LabourResponseDto;
-import com.web.tilotoma.entity.*;
-import com.web.tilotoma.exceptions.ResourceNotFoundException;
+import com.web.tilotoma.entity.labour.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.LabourService;
 import org.springframework.beans.factory.annotation.Autowired;

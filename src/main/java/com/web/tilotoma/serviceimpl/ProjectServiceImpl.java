@@ -1,8 +1,8 @@
 package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.ProjectDto;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.entity.labour.Contractor;
+import com.web.tilotoma.entity.labour.Project;
 import com.web.tilotoma.repository.ContractorRepository;
 import com.web.tilotoma.repository.ProjectRepo;
 import com.web.tilotoma.service.ProjectService;

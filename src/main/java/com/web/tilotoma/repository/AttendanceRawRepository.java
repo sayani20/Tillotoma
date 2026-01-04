@@ -1,6 +1,6 @@
 package com.web.tilotoma.repository;
 
-import com.web.tilotoma.entity.AttendanceRaw;
+import com.web.tilotoma.entity.labour.AttendanceRaw;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

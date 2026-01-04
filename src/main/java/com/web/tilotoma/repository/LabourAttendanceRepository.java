@@ -1,6 +1,6 @@
 package com.web.tilotoma.repository;
-import com.web.tilotoma.entity.LabourAttendance;
-import com.web.tilotoma.entity.Labour;
+import com.web.tilotoma.entity.labour.LabourAttendance;
+import com.web.tilotoma.entity.labour.Labour;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,5 +1,4 @@
-package com.web.tilotoma.entity;
-
+package com.web.tilotoma.entity.material;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,34 +7,31 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+
 @Entity
-@Table(name = "contractor_payment_history")
+@Table(name = "vendor_payments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContractorPaymentHistory {
+public class VendorPayment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contractor_payment_id", nullable = false)
-    private ContractorPayment contractorPayment;
+    @JoinColumn(name = "vendor_bill_id", nullable = false)
+    private VendorBill vendorBill;
 
-    // এই update এ admin কত দিল
     @Column(nullable = false)
     private Double paidAmount;
 
     @Column(nullable = false)
+    private String paymentMode; // CASH, UPI, BANK
+
+    @Column(nullable = false)
     private LocalDate paymentDate;
 
-    // 🔥 payment method as STRING
-    @Column(nullable = false, length = 50)
-    private String paymentMethod;
-    // example: CASH, UPI, BANK, CHEQUE
-
     private String remarks;
-
 }

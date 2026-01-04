@@ -1,11 +1,10 @@
 package com.web.tilotoma.serviceimpl;
 
-import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.LoginDto;
 import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
-import com.web.tilotoma.entity.Role;
-import com.web.tilotoma.entity.User;
+import com.web.tilotoma.entity.labour.Role;
+import com.web.tilotoma.entity.labour.User;
 import com.web.tilotoma.exceptions.ResourceNotFoundException;
 import com.web.tilotoma.repository.RoleRepo;
 import com.web.tilotoma.repository.UserRepo;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {

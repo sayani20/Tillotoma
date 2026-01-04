@@ -1,7 +1,7 @@
 package com.web.tilotoma.repository;
-import com.web.tilotoma.entity.ContractorLabourRate;
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.LabourType;
+import com.web.tilotoma.entity.labour.ContractorLabourRate;
+import com.web.tilotoma.entity.labour.Contractor;
+import com.web.tilotoma.entity.labour.LabourType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

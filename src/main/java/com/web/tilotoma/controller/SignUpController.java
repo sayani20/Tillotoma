@@ -1,8 +1,8 @@
 package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.*;
-import com.web.tilotoma.entity.Role;
-import com.web.tilotoma.entity.User;
+import com.web.tilotoma.entity.labour.Role;
+import com.web.tilotoma.entity.labour.User;
 import com.web.tilotoma.repository.UserRepo;
 import com.web.tilotoma.serviceimpl.SignUpServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

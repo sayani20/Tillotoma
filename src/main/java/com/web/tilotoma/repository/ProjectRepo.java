@@ -1,7 +1,7 @@
 package com.web.tilotoma.repository;
 
-import com.web.tilotoma.entity.Contractor;
-import com.web.tilotoma.entity.Project;
+import com.web.tilotoma.entity.labour.Contractor;
+import com.web.tilotoma.entity.labour.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

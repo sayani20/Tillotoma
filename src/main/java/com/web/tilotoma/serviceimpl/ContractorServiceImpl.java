@@ -7,11 +7,9 @@ import com.web.tilotoma.dto.bill.ContractorBillingResponse;
 
 import com.web.tilotoma.dto.bill.LabourBillingDetailsResponse;
 import com.web.tilotoma.dto.response.ContractorDetailsDto;
-import com.web.tilotoma.dto.response.LabourBillingDto;
-import com.web.tilotoma.dto.response.ProjectBillingDto;
-import com.web.tilotoma.entity.*;
 
 
+import com.web.tilotoma.entity.labour.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.ContractorService;
 import org.springframework.beans.factory.annotation.Autowired;

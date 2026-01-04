@@ -1,11 +1,10 @@
 package com.web.tilotoma.service;
 
-import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.LoginDto;
 import com.web.tilotoma.dto.RoleDto;
 import com.web.tilotoma.dto.UserDto;
-import com.web.tilotoma.entity.Role;
-import com.web.tilotoma.entity.User;
+import com.web.tilotoma.entity.labour.Role;
+import com.web.tilotoma.entity.labour.User;
 
 import java.util.List;
 

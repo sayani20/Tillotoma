@@ -1,4 +1,4 @@
-package com.web.tilotoma.entity;
+package com.web.tilotoma.entity.labour;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -45,7 +45,7 @@ public class User {
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "created_by", nullable = true)
-        private com.web.tilotoma.entity.User createdBy;
+        private User createdBy;
 
         @Column(name = "is_active")
         private Boolean isActive = true;

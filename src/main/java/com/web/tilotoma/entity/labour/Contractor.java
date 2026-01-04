@@ -1,4 +1,4 @@
-package com.web.tilotoma.entity;
+package com.web.tilotoma.entity.labour;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

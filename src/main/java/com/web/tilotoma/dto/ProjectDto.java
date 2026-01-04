@@ -1,6 +1,6 @@
 package com.web.tilotoma.dto;
 
-import com.web.tilotoma.entity.ProjectType;
+import com.web.tilotoma.entity.labour.ProjectType;
 import lombok.Data;
 
 import java.time.LocalDateTime;

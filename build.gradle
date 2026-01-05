@@ -31,6 +31,9 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.+'
 	implementation 'org.mindrot:jbcrypt:0.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+
 
 }
 

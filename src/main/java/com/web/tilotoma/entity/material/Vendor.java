@@ -29,6 +29,8 @@ public class Vendor {
 
     @Column(length = 100)
     private String emailId;
+    @Column(length = 100)
+    private String materialCategory;
 
     @Column(length = 20)
     private String gstNumber;

@@ -2,7 +2,7 @@ package com.web.tilotoma.controller;
 
 
 import com.web.tilotoma.dto.VendorRequestDto;
-import com.web.tilotoma.dto.VendorResponseDto;
+import com.web.tilotoma.entity.material.Vendor;
 import com.web.tilotoma.service.VendorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,30 +20,35 @@ public class VendorController {
     private VendorService vendorService;
 
     @PostMapping("/addVendor")
-    public ResponseEntity<VendorResponseDto> addVendor(
+    public ResponseEntity<String> addVendor(
             @Valid @RequestBody VendorRequestDto requestDto) {
 
         return ResponseEntity.ok(vendorService.addVendor(requestDto));
     }
-    @PutMapping("/updateVendor/{id}")
-    public ResponseEntity<VendorResponseDto> updateVendor(
-            @PathVariable Long id,
-            @Valid @RequestBody VendorRequestDto dto) {
 
-        return ResponseEntity.ok(vendorService.updateVendor(id, dto));
+    @PostMapping("/updateVendor")
+    public ResponseEntity<String> updateVendor(
+            @Valid @RequestBody VendorRequestDto requestDto) {
+
+        String result = vendorService.updateVendor(requestDto);
+        return ResponseEntity.ok(result);
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteVendor(@PathVariable Long id) {
+    @DeleteMapping ("/deleteVendor/{id}")
+    public ResponseEntity<String> deleteVendor(
+            @PathVariable Long id) {
 
-        vendorService.deleteVendor(id);
-        return ResponseEntity.ok("Vendor deactivated successfully");
+        String result = vendorService.deleteVendor(id);
+        return ResponseEntity.ok(result);
+    }
+    @GetMapping("/allVendor")
+    public ResponseEntity<List<Vendor>> allActive() {
+
+        List<Vendor> list = vendorService.getAllActiveVendors();
+        return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/allVendors")
-    public ResponseEntity<List<VendorResponseDto>> getAllVendors() {
 
-        return ResponseEntity.ok(vendorService.getAllVendors());
-    }
+
 
 
 

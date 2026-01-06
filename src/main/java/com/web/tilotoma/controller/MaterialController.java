@@ -2,8 +2,10 @@ package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.MaterialRequestDto;
 import com.web.tilotoma.dto.MaterialResponseDto;
+import com.web.tilotoma.entity.material.Material;
 import com.web.tilotoma.service.MaterialService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,38 +15,34 @@ import java.util.List;
 @RequestMapping("/api/materials")
 @RequiredArgsConstructor
 public class MaterialController {
-
-    private final MaterialService materialService;
+    @Autowired
+    private  MaterialService materialService;
 
     // ➕ Add material
-    @PostMapping("addMaterial")
-    public ResponseEntity<MaterialResponseDto> addMaterial(
-            @RequestBody MaterialRequestDto request) {
-
-        return ResponseEntity.ok(materialService.addMaterial(request));
+    @PostMapping("/addMaterial")
+    public String add(@RequestBody MaterialRequestDto req) {
+        return materialService.addMaterial(req);
+    }
+    @PutMapping("/updateMaterial")
+    public String update(@RequestBody MaterialRequestDto req) {
+        return materialService.updateMaterial(req);
+    }
+    @DeleteMapping("/deleteMaterial/{id}")
+    public String softDelete(@PathVariable Long id) {
+        return materialService.deleteMaterial(id);
     }
 
-    // ✏️ Update material
-    @PutMapping("updateMaterial/{id}")
-    public ResponseEntity<MaterialResponseDto> updateMaterial(
-            @PathVariable Long id,
-            @RequestBody MaterialRequestDto request) {
-
-        return ResponseEntity.ok(materialService.updateMaterial(id, request));
+    @GetMapping("/allMaterials")
+    public List<Material> all() {
+        return materialService.getAllMaterials();
     }
 
-    // ❌ Delete material (soft delete)
-    @DeleteMapping("deleteMaterial/{id}")
-    public ResponseEntity<String> deleteMaterial(@PathVariable Long id) {
-
-        materialService.deleteMaterial(id);
-        return ResponseEntity.ok("Material deleted successfully");
+    @GetMapping("/getMaterials/{categoryId}")
+    public List<Material> byCategory(@PathVariable Long categoryId) {
+        return materialService.getMaterialByCategory(categoryId);
     }
 
-    // 📄 Get all active materials
-    @GetMapping("getAllMaterials")
-    public ResponseEntity<List<MaterialResponseDto>> getAllMaterials() {
 
-        return ResponseEntity.ok(materialService.getAllActiveMaterials());
-    }
+
+
 }

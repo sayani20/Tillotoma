@@ -1,10 +1,9 @@
 package com.web.tilotoma.entity.material;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "vendors")
@@ -18,28 +17,37 @@ public class Vendor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Basic Info
-    @Column(nullable = false)
+    @Column(nullable=false)
     private String vendorName;
 
     private String contactPersonName;
 
-    @Column(length = 15)
+    @Column(length=15)
     private String mobile;
 
-    @Column(length = 100)
+    @Column(length=100)
     private String emailId;
-    @Column(length = 100)
-    private String materialCategory;
 
-    @Column(length = 20)
     private String gstNumber;
-
-    @Column(length = 255)
     private String address;
 
-    // Status
-    @Column(nullable = false)
-    private Boolean isActive = true;
-}
+    @Column(nullable=false)
+    private Boolean isActive=true;
 
+    // 🔥 NEW
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="material_category_id", nullable=false)
+    private MaterialCategory materialCategory;
+
+    // vendor ওই category-এর material দেবে
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "vendor_materials",
+            joinColumns = @JoinColumn(name="vendor_id"),
+            inverseJoinColumns = @JoinColumn(name="material_id")
+    )
+    private List<Material> materials;
+
+    @Column(name="created_on")
+    private LocalDateTime createdOn;
+}

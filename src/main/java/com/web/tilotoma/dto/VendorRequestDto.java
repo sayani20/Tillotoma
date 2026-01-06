@@ -6,25 +6,19 @@ import jakarta.validation.constraints.Size;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class VendorRequestDto {
-
-    @NotBlank(message = "Vendor name is required")
+    private Long id;
     private String vendorName;
-
     private String contactPersonName;
-
-    @Size(max = 15, message = "Mobile number max 15 digits")
     private String mobile;
-
-    @Email(message = "Invalid email format")
     private String emailId;
-    @NotBlank(message = "Material category is required")
-    private String materialCategory;
 
-    @Size(max = 20, message = "GST number max 20 characters")
+    private Long materialCategoryId;   // ← parent table theke asbe
+    private List<Long> materialIds;    // ← oi category er materials
+
     private String gstNumber;
-
     private String address;
-
 }

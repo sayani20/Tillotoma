@@ -10,4 +10,5 @@ public interface  MaterialRepository extends JpaRepository<Material, Long> {
     boolean existsByMaterialNameIgnoreCase(String materialName);
 
     List<Material> findByIsActiveTrue();
+    List<Material> findByMaterialCategory_IdAndIsActiveTrue(Long categoryId);
 }

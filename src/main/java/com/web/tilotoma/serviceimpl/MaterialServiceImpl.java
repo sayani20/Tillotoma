@@ -3,91 +3,138 @@ package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.MaterialRequestDto;
 import com.web.tilotoma.dto.MaterialResponseDto;
 import com.web.tilotoma.entity.material.Material;
+import com.web.tilotoma.entity.material.MaterialCategory;
+import com.web.tilotoma.repository.CategoryRepository;
 import com.web.tilotoma.repository.MaterialRepository;
 import com.web.tilotoma.service.MaterialService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MaterialServiceImpl implements MaterialService {
+    @Autowired
 
-    private final MaterialRepository materialRepository;
+    private  MaterialRepository materialRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Override
-    public MaterialResponseDto addMaterial(MaterialRequestDto request) {
+    public String addMaterial(MaterialRequestDto request) {
 
-        if (materialRepository.existsByMaterialNameIgnoreCase(request.getMaterialName())) {
-            throw new RuntimeException("Material already exists");
+        String catName = request.getMaterialCategory();
+
+        if (catName == null || catName.trim().isEmpty()) {
+            throw new RuntimeException("Category name required");
+        }
+
+        MaterialCategory cat = categoryRepository
+                .findByName(catName.trim())
+                .orElse(null);
+
+        if (cat == null) {
+            cat = MaterialCategory.builder()
+                    .name(catName.trim())
+                    .isActive(true)
+                    .createdOn(LocalDateTime.now())
+                    .build();
+
+            categoryRepository.save(cat);
         }
 
         Material material = Material.builder()
                 .materialName(request.getMaterialName())
                 .unit(request.getUnit())
-                .category(request.getCategory())
                 .minimumLimit(request.getMinimumLimit())
+                .brand(request.getBrand())
+                .materialCategory(cat)
+                .createdOn(LocalDateTime.now())
                 .isActive(true)
                 .build();
 
         materialRepository.save(material);
-        return mapToDto(material);
+
+        return "Material saved successfully";
     }
 
     @Override
-    public MaterialResponseDto updateMaterial(Long materialId, MaterialRequestDto request) {
+    public String updateMaterial(MaterialRequestDto req) {
+        // --- Validation ---
+        if (req.getId() == null) {
+            throw new RuntimeException("Material id required");
+        }
 
-        Material material = materialRepository.findById(materialId)
+        String catName = req.getMaterialCategory();
+        if (catName == null || catName.trim().isEmpty()) {
+            throw new RuntimeException("Category name required");
+        }
+
+        // --- Existing Material Fetch ---
+        Material material = materialRepository.findById(req.getId())
                 .orElseThrow(() -> new RuntimeException("Material not found"));
 
-        if (request.getMaterialName() != null) {
-            material.setMaterialName(request.getMaterialName());
+        // --- Category check + auto create ---
+        MaterialCategory cat = categoryRepository.findByName(catName.trim())
+                .orElse(null);
+
+        if (cat == null) {
+            cat = MaterialCategory.builder()
+                    .name(catName.trim())
+                    .isActive(true)
+                    .createdOn(LocalDateTime.now())
+                    .build();
+
+            categoryRepository.save(cat);
         }
-        if (request.getUnit() != null) {
-            material.setUnit(request.getUnit());
-        }
-        if (request.getCategory() != null) {
-            material.setCategory(request.getCategory());
-        }
-        if (request.getMinimumLimit() != null) {
-            material.setMinimumLimit(request.getMinimumLimit());
-        }
+
+        // --- Field Update ---
+        material.setMaterialName(req.getMaterialName());
+        material.setUnit(req.getUnit());
+        material.setBrand(req.getBrand());
+        material.setMinimumLimit(req.getMinimumLimit());
+        material.setMaterialCategory(cat);
+        material.setCreatedOn(LocalDateTime.now());
 
         materialRepository.save(material);
-        return mapToDto(material);
+
+        return "Material updated successfully";
     }
+    public String deleteMaterial(Long id) {
 
-    @Override
-    public void deleteMaterial(Long materialId) {
+        if (id == null) {
+            throw new RuntimeException("Material id required");
+        }
 
-        Material material = materialRepository.findById(materialId)
+        Material material = materialRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Material not found"));
 
-        material.setIsActive(false); // ✅ Soft delete
+        // 🔥 Soft delete
+        material.setIsActive(false);
         materialRepository.save(material);
+
+        return "Material soft deleted successfully";
+    }
+    public List<Material> getAllMaterials() {
+        return materialRepository.findByIsActiveTrue();
     }
 
-    @Override
-    public List<MaterialResponseDto> getAllActiveMaterials() {
+    public List<Material> getMaterialByCategory(Long categoryId) {
 
-        return materialRepository.findByIsActiveTrue()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
+        if (categoryId == null) {
+            throw new RuntimeException("Category id required");
+        }
+
+        return materialRepository
+                .findByMaterialCategory_IdAndIsActiveTrue(categoryId);
     }
 
-    private MaterialResponseDto mapToDto(Material material) {
 
-        return new MaterialResponseDto(
-                material.getId(),
-                material.getMaterialName(),
-                material.getUnit(),
-                material.getCategory(),
-                material.getMinimumLimit(),
-                material.getIsActive()
-        );
-    }
+
+
 }

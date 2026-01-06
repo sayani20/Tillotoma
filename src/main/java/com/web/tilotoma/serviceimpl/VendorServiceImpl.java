@@ -2,12 +2,17 @@ package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.VendorRequestDto;
 import com.web.tilotoma.dto.VendorResponseDto;
+import com.web.tilotoma.entity.material.Material;
+import com.web.tilotoma.entity.material.MaterialCategory;
 import com.web.tilotoma.entity.material.Vendor;
+import com.web.tilotoma.repository.CategoryRepository;
+import com.web.tilotoma.repository.MaterialRepository;
 import com.web.tilotoma.repository.VendorRepository;
 import com.web.tilotoma.service.VendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,92 +20,142 @@ import java.util.List;
 public class VendorServiceImpl implements VendorService {
     @Autowired
     private VendorRepository vendorRepository;
-    @Override
-    public VendorResponseDto addVendor(VendorRequestDto dto) {
-        Vendor vendor = Vendor.builder()
-                .vendorName(dto.getVendorName())
-                .contactPersonName(dto.getContactPersonName())
-                .mobile(dto.getMobile())
-                .emailId(dto.getEmailId())
-                .materialCategory(dto.getMaterialCategory())
-                .gstNumber(dto.getGstNumber())
-                .address(dto.getAddress())
-                .isActive(true)
-                .build();
 
-        Vendor saved = vendorRepository.save(vendor);
+    @Autowired
+    private MaterialRepository materialRepository;
 
-        return VendorResponseDto.builder()
-                .id(saved.getId())
-                .vendorName(saved.getVendorName())
-                .contactPersonName(saved.getContactPersonName())
-                .mobile(saved.getMobile())
-                .emailId(saved.getEmailId())
-                .gstNumber(saved.getGstNumber())
-                .address(saved.getAddress())
-                .isActive(saved.getIsActive())
-                .build();
+    @Autowired
+    private CategoryRepository categoryRepository;
+    public String addVendor(VendorRequestDto req) {
 
-    }
-
-    public VendorResponseDto updateVendor(Long id, VendorRequestDto dto) {
-
-        Vendor vendor = vendorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
-        vendor.setVendorName(dto.getVendorName());
-        vendor.setContactPersonName(dto.getContactPersonName());
-        vendor.setMobile(dto.getMobile());
-        vendor.setEmailId(dto.getEmailId());
-        vendor.setMaterialCategory(dto.getMaterialCategory());
-        vendor.setGstNumber(dto.getGstNumber());
-        vendor.setAddress(dto.getAddress());
-
-        Vendor updated = vendorRepository.save(vendor);
-
-        return VendorResponseDto.builder()
-                .id(updated.getId())
-                .vendorName(updated.getVendorName())
-                .contactPersonName(updated.getContactPersonName())
-                .mobile(updated.getMobile())
-                .emailId(updated.getEmailId())
-                .materialCategory(updated.getMaterialCategory())
-                .gstNumber(updated.getGstNumber())
-                .address(updated.getAddress())
-                .isActive(updated.getIsActive())
-                .build();
-    }
-    public void deleteVendor(Long id) {
-
-        Vendor vendor = vendorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
-        vendor.setIsActive(false);
-        vendorRepository.save(vendor);
-    }
-
-    public List<VendorResponseDto> getAllVendors() {
-
-        List<Vendor> vendors = vendorRepository.findByIsActiveTrue();
-        List<VendorResponseDto> responseList = new ArrayList<>();
-
-        for (Vendor v : vendors) {
-            responseList.add(
-                    VendorResponseDto.builder()
-                            .id(v.getId())
-                            .vendorName(v.getVendorName())
-                            .contactPersonName(v.getContactPersonName())
-                            .mobile(v.getMobile())
-                            .emailId(v.getEmailId())
-                            .materialCategory(v.getMaterialCategory())
-                            .gstNumber(v.getGstNumber())
-                            .address(v.getAddress())
-                            .isActive(v.getIsActive())
-                            .build()
-            );
+        // --- Validation ---
+        if (req.getVendorName() == null
+                || req.getVendorName().trim().isEmpty()) {
+            throw new RuntimeException("Vendor name required");
         }
 
-        return responseList;
+        if (req.getMaterialCategoryId() == null) {
+            throw new RuntimeException("Category id required");
+        }
+
+        // --- Category fetch ---
+        MaterialCategory cat = categoryRepository.findById(req.getMaterialCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        // --- Materials integrity check ---
+        List<Material> categoryWiseMaterials =
+                materialRepository.findByMaterialCategory_IdAndIsActiveTrue(cat.getId());
+
+        // selected materials ওই list এর ভিতরে আছে কি না
+        List<Long> validMaterialIds =
+                categoryWiseMaterials.stream()
+                        .map(Material::getId)
+                        .toList();
+
+        for (Long mid : req.getMaterialIds()) {
+            if (!validMaterialIds.contains(mid)) {
+                throw new RuntimeException(
+                        "Invalid material selected for this category"
+                );
+            }
+        }
+
+        // --- Vendor save ---
+        Vendor vendor = Vendor.builder()
+                .vendorName(req.getVendorName().trim())
+                .contactPersonName(req.getContactPersonName())
+                .mobile(req.getMobile())
+                .emailId(req.getEmailId())
+                .materialCategory(cat)          // ← FK
+                .gstNumber(req.getGstNumber())
+                .address(req.getAddress())
+                .isActive(true)
+                .createdOn(LocalDateTime.now())
+                .build();
+
+        // materials set
+        List<Material> selected =
+                materialRepository.findAllById(req.getMaterialIds());
+
+        vendor.setMaterials(selected);
+
+        vendorRepository.save(vendor);
+
+        return "Vendor saved successfully";
+    }
+
+    public String updateVendor(VendorRequestDto req) {
+
+        // --- Validation ---
+        if (req.getId() == null) {
+            throw new RuntimeException("Vendor id required");
+        }
+
+        if (req.getMaterialCategoryId() == null) {
+            throw new RuntimeException("Category id required");
+        }
+
+        // --- Existing Vendor Fetch ---
+        Vendor vendor = vendorRepository.findById(req.getId())
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+
+        // --- Category Fetch ---
+        MaterialCategory cat = categoryRepository.findById(req.getMaterialCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        // --- Integrity Check ---
+        List<Material> categoryWise =
+                materialRepository.findByMaterialCategory_IdAndIsActiveTrue(cat.getId());
+
+        List<Long> validIds =
+                categoryWise.stream().map(Material::getId).toList();
+
+        for (Long mid : req.getMaterialIds()) {
+            if (!validIds.contains(mid)) {
+                throw new RuntimeException("Invalid material for this category");
+            }
+        }
+
+        // --- Field Update ---
+        vendor.setVendorName(req.getVendorName());
+        vendor.setContactPersonName(req.getContactPersonName());
+        vendor.setMobile(req.getMobile());
+        vendor.setEmailId(req.getEmailId());
+        vendor.setAddress(req.getAddress());
+        vendor.setGstNumber(req.getGstNumber());
+
+        // category relation
+        vendor.setMaterialCategory(cat);
+
+        // materials set
+        List<Material> selected =
+                materialRepository.findAllById(req.getMaterialIds());
+
+        vendor.setMaterials(selected);
+
+        vendorRepository.save(vendor);
+
+        return "Vendor updated successfully";
+    }
+
+    public String deleteVendor(Long id) {
+
+        if (id == null) {
+            throw new RuntimeException("Vendor id required");
+        }
+
+        Vendor vendor = vendorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+
+        // 🔥 soft delete
+        vendor.setIsActive(false);
+        vendorRepository.save(vendor);
+
+        return "Vendor soft deleted successfully";
+    }
+
+    public List<Vendor> getAllActiveVendors() {
+        return vendorRepository.findByIsActiveTrue();
     }
 
 

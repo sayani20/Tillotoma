@@ -17,25 +17,26 @@ public class Material {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="material_name", nullable = false)
+    @Column(name = "material_name", nullable = false)
     private String materialName;
 
     @Column(nullable = false)
-    private String unit;        // BAG, KG, CFT, NOS
+    private String unit;   // BAG, KG, CFT, NOS
 
     private String brand;
 
-    @Column(name="minimum_limit", nullable = false)
+    @Column(name = "minimum_limit", nullable = false)
     private Double minimumLimit;
 
+    // ✅ ONLY FK COLUMN (NO extra "category" column)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="category_id", nullable=false)
+    @JoinColumn(name = "category_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MaterialCategory materialCategory;
 
-    @Column(name="is_active")
+    @Column(name = "is_active")
     private Boolean isActive = true;
 
-    @Column(name="created_on")
+    @Column(name = "created_on")
     private LocalDateTime createdOn;
 }

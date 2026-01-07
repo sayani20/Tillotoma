@@ -1,7 +1,10 @@
 package com.web.tilotoma.entity.material;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.web.tilotoma.entity.material.Material;
+import com.web.tilotoma.entity.material.MaterialCategory;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,43 +14,42 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Vendor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
     private String vendorName;
 
     private String contactPersonName;
 
-    @Column(length=15)
     private String mobile;
 
-    @Column(length=100)
     private String emailId;
 
     private String gstNumber;
+
     private String address;
 
-    @Column(nullable=false)
-    private Boolean isActive=true;
-
-    // 🔥 NEW
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="material_category_id", nullable=false)
+    @JoinColumn(name = "material_category_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MaterialCategory materialCategory;
 
-    // vendor ওই category-এর material দেবে
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(
             name = "vendor_materials",
-            joinColumns = @JoinColumn(name="vendor_id"),
-            inverseJoinColumns = @JoinColumn(name="material_id")
+            joinColumns = @JoinColumn(name = "vendor_id"),
+            inverseJoinColumns = @JoinColumn(name = "material_id")
     )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<Material> materials;
 
-    @Column(name="created_on")
+    @Column(name = "isActive")
+    private Boolean isActive = true;
+
+    @Column(name = "created_on")
     private LocalDateTime createdOn;
 }

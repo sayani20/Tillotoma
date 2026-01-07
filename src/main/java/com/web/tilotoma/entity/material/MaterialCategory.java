@@ -15,13 +15,13 @@ public class MaterialCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name", nullable = false, unique = true)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @Column(name="is_active")
+    @Column(name = "is_active")
     private Boolean isActive = true;
 
-    @Column(name="created_on")
+    @Column(name = "created_on")
     private LocalDateTime createdOn;
 }
 

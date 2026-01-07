@@ -5,9 +5,11 @@ import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.VendorOrder;
 import com.web.tilotoma.service.VendorOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,17 +41,35 @@ public class VendorOrderController {
 
     // ✅ Get All Vendor Orders
     @GetMapping("/allOrder")
-    public ResponseEntity<ApiResponse<List<VendorOrderListResponseDto>>> getAllOrders() {
+    public ResponseEntity<ApiResponse<List<VendorOrderListResponseDto>>> getAllOrders(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
 
-        List<VendorOrderListResponseDto> orders = orderService.getAllOrders();
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    ) {
+        try {
+            List<VendorOrderListResponseDto> orders =
+                    orderService.getAllOrders(fromDate, toDate);
 
-        return ResponseEntity.ok(
-                new ApiResponse<>(
-                        true,
-                        "Vendor orders fetched successfully",
-                        orders
-                )
-        );
+            return ResponseEntity.ok(
+                    new ApiResponse<>(
+                            true,
+                            "Vendor orders fetched successfully",
+                            orders
+                    )
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(
+                            false,
+                            "Failed to fetch vendor orders",
+                            null
+                    ));
+        }
     }
 
     // ✅ Update Order Status (PENDING → APPROVED)

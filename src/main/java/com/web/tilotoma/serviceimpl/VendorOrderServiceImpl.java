@@ -8,7 +8,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -81,11 +83,19 @@ public class VendorOrderServiceImpl implements VendorOrderService {
 
 
     @Override
-    public List<VendorOrderListResponseDto> getAllOrders() {
+    public List<VendorOrderListResponseDto> getAllOrders(
+            LocalDate fromDate,
+            LocalDate toDate) {
 
-        return orderRepository.findAll().stream().map(order -> {
+        List<VendorOrder> orders =
+                orderRepository.findOrdersByDateRange(fromDate, toDate);
 
-            VendorOrderListResponseDto dto = new VendorOrderListResponseDto();
+        List<VendorOrderListResponseDto> response = new ArrayList<>();
+
+        for (VendorOrder order : orders) {
+
+            VendorOrderListResponseDto dto =
+                    new VendorOrderListResponseDto();
 
             dto.setOrderId(order.getId());
             dto.setOrderNumber(order.getOrderNumber());
@@ -97,24 +107,30 @@ public class VendorOrderServiceImpl implements VendorOrderService {
             dto.setVendorId(order.getVendor().getId());
             dto.setVendorName(order.getVendor().getVendorName());
 
-            dto.setItems(
-                    order.getItems().stream().map(item -> {
-                        VendorOrderListResponseDto.OrderItemDto i =
-                                new VendorOrderListResponseDto.OrderItemDto();
+            List<VendorOrderListResponseDto.OrderItemDto> itemDtos =
+                    new ArrayList<>();
 
-                        i.setMaterialId(item.getMaterial().getId());
-                        i.setMaterialName(item.getMaterial().getMaterialName());
-                        i.setUnit(item.getUnit());
-                        i.setQuantity(item.getQuantity());
-                        i.setRate(item.getRate());
-                        i.setNetAmount(item.getNetAmount());
-                        return i;
-                    }).toList()
-            );
+            for (VendorOrderItem item : order.getItems()) {
+                VendorOrderListResponseDto.OrderItemDto i =
+                        new VendorOrderListResponseDto.OrderItemDto();
 
-            return dto;
-        }).toList();
+                i.setMaterialId(item.getMaterial().getId());
+                i.setMaterialName(item.getMaterial().getMaterialName());
+                i.setUnit(item.getUnit());
+                i.setQuantity(item.getQuantity());
+                i.setRate(item.getRate());
+                i.setNetAmount(item.getNetAmount());
+
+                itemDtos.add(i);
+            }
+
+            dto.setItems(itemDtos);
+            response.add(dto);
+        }
+
+        return response;
     }
+
 
 
     @Override

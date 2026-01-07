@@ -1,0 +1,148 @@
+package com.web.tilotoma.serviceimpl;
+
+import com.web.tilotoma.dto.MaterialReceiveRequestDto;
+import com.web.tilotoma.dto.MaterialReceiveResponseDto;
+import com.web.tilotoma.dto.VendorOrderReceiveDto;
+import com.web.tilotoma.entity.material.*;
+import com.web.tilotoma.repository.*;
+import com.web.tilotoma.service.VendorOrderReceiveService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class VendorOrderReceiveServiceImpl
+        implements VendorOrderReceiveService {
+
+    @Autowired
+    private VendorOrderRepository orderRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private VendorOrderReceiveRepository receiveRepository;
+
+    @Autowired
+    private StockLedgerRepository stockLedgerRepository;
+
+    @Autowired
+    private VendorPaymentRepository paymentRepository;
+
+    /**
+     * ✅ Receive material against an order
+     * - Save receive entry (with challan)
+     * - Update stock ledger (IN)
+     * - Optional vendor payment
+     * - Calculate received / paid / outstanding
+     */
+    @Override
+    @Transactional
+    public MaterialReceiveResponseDto receiveMaterial(
+            MaterialReceiveRequestDto request) {
+
+        // 1️⃣ Validate Order
+        VendorOrder order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Vendor vendor = order.getVendor();
+
+        // 2️⃣ Receive material + Stock IN
+        request.getItems().forEach(item -> {
+
+            Material material = materialRepository
+                    .findById(item.getMaterialId())
+                    .orElseThrow(() ->
+                            new RuntimeException("Material not found"));
+
+            double amount = item.getQuantity() * item.getRate();
+
+            // 🔹 Save receive entry
+            VendorOrderReceive receive = VendorOrderReceive.builder()
+                    .vendorOrder(order)
+                    .material(material)
+                    .receivedQuantity(item.getQuantity())
+                    .receivedRate(item.getRate())
+                    .receivedAmount(amount)
+                    .challanNumber(request.getChallanNumber())
+                    .receivedOn(LocalDateTime.now())
+                    .build();
+
+            receiveRepository.save(receive);
+
+            // 🔹 Stock Ledger IN
+            StockLedger ledger = StockLedger.builder()
+                    .material(material)
+                    .vendorOrder(order)
+                    .txnType(StockTxnType.IN)
+                    .quantity(item.getQuantity())
+                    .rate(item.getRate())
+                    .reference("ORDER_RECEIVE")
+                    .txnDate(LocalDateTime.now())
+                    .build();
+
+            stockLedgerRepository.save(ledger);
+        });
+
+        // 3️⃣ Optional payment at receive time
+        if (request.getPaidAmount() != null
+                && request.getPaidAmount() > 0) {
+
+            VendorPayment payment = VendorPayment.builder()
+                    .vendor(vendor)
+                    .vendorOrder(order)
+                    .paidAmount(request.getPaidAmount())
+                    .paymentMode(request.getPaymentMode())
+                    .referenceNo(request.getPaymentRef())
+                    .paidOn(LocalDateTime.now())
+                    .build();
+
+            paymentRepository.save(payment);
+        }
+
+        // 4️⃣ Final calculation (SOURCE OF TRUTH)
+        Double totalReceived =
+                receiveRepository.getTotalReceivedAmount(order.getId());
+
+        Double totalPaid =
+                paymentRepository.getTotalPaidByOrder(order.getId());
+
+        Double outstanding =
+                totalReceived - totalPaid;
+
+        // 5️⃣ Return proper response DTO
+        return new MaterialReceiveResponseDto(
+                order.getId(),
+                totalReceived,
+                totalPaid,
+                outstanding
+        );
+    }
+
+    // ✅ RECEIVE LIST BY ORDER
+    @Override
+    public List<VendorOrderReceiveDto.ReceiveResponse>
+    getReceivedByOrder(Long orderId) {
+
+        return receiveRepository.findByVendorOrder_Id(orderId)
+                .stream()
+                .map(r -> {
+                    VendorOrderReceiveDto.ReceiveResponse res =
+                            new VendorOrderReceiveDto.ReceiveResponse();
+
+                    res.setReceiveId(r.getId());
+                    res.setMaterialId(r.getMaterial().getId());
+                    res.setMaterialName(r.getMaterial().getMaterialName());
+                    res.setQuantity(r.getReceivedQuantity());
+                    res.setRate(r.getReceivedRate());
+                    res.setAmount(r.getReceivedAmount());
+                    res.setChallanNumber(r.getChallanNumber());
+                    res.setReceivedOn(r.getReceivedOn());
+
+                    return res;
+                }).toList();
+    }
+}

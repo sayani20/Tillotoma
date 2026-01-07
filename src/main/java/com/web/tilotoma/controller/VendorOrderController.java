@@ -1,6 +1,7 @@
 package com.web.tilotoma.controller;
 import com.web.tilotoma.dto.ApiResponse;
 import com.web.tilotoma.dto.VendorOrderDto;
+import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.VendorOrder;
 import com.web.tilotoma.service.VendorOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,27 +16,7 @@ public class VendorOrderController {
     @Autowired
     private VendorOrderService orderService;
 
-    /*// ✅ Create Vendor Order
-    @PostMapping("/createOrder")
-    public ResponseEntity<ApiResponse<String>> createOrder(
-            @RequestBody VendorOrderDto.CreateOrderRequest request) {
 
-        try {
-            String message = orderService.createOrder(request);
-            return ResponseEntity.ok(
-                    new ApiResponse<>(true, message, null)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiResponse<>(false, e.getMessage(), null));
-        } catch (Exception e) {
-
-            return ResponseEntity.internalServerError()
-                    .body(new ApiResponse<>(false, "Failed to create vendor order", null));
-
-
-        }
-    }*/
 
     // =====================================================
     // ✅ CREATE ORDER
@@ -58,17 +39,17 @@ public class VendorOrderController {
 
     // ✅ Get All Vendor Orders
     @GetMapping("/allOrder")
-    public ResponseEntity<ApiResponse<List<VendorOrder>>> getAllOrders() {
+    public ResponseEntity<ApiResponse<List<VendorOrderListResponseDto>>> getAllOrders() {
 
-        try {
-            List<VendorOrder> orders = orderService.getAllOrders();
-            return ResponseEntity.ok(
-                    new ApiResponse<>(true, "Vendor orders fetched successfully", orders)
-            );
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(new ApiResponse<>(false, "Failed to fetch vendor orders", null));
-        }
+        List<VendorOrderListResponseDto> orders = orderService.getAllOrders();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Vendor orders fetched successfully",
+                        orders
+                )
+        );
     }
 
     // ✅ Update Order Status (PENDING → APPROVED)

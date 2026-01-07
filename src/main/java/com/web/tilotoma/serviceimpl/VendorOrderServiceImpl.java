@@ -1,5 +1,6 @@
 package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.VendorOrderDto;
+import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.VendorOrderService;
@@ -22,51 +23,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
     @Autowired
     private VendorOrderRepository orderRepository;
 
-   /* @Override
-    @Transactional   // 🔥 THIS IS THE FIX
-    public String createOrder(VendorOrderDto.CreateOrderRequest request) {
 
-        Vendor vendor = vendorRepository.findById(request.getVendorId())
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
-        VendorOrder order = VendorOrder.builder()
-                .vendor(vendor)
-                .status(OrderStatus.PENDING)
-                .orderDate(request.getOrderDate())
-                .requiredBy(request.getRequiredBy())
-                .remarks(request.getRemarks())
-                .totalAmount(request.getTotalAmount())
-                .build();
-
-        List<VendorOrderItem> items = request.getItems().stream().map(i -> {
-
-            Material material = materialRepository.findById(i.getMaterialId())
-                    .orElseThrow(() -> new RuntimeException("Material not found"));
-
-            return VendorOrderItem.builder()
-                    .vendorOrder(order)
-                    .material(material)
-                    .brand(i.getBrand())
-                    .unit(i.getUnit())
-                    .quantity(i.getQuantity())
-                    .rate(i.getRate())
-                    .netAmount(i.getNetAmount())
-                    .build();
-        }).toList();
-
-        order.setItems(items);
-
-        // save 1 → generate ID
-        VendorOrder saved = orderRepository.save(order);
-
-        // derive order number
-        saved.setOrderNumber("ODR-" + saved.getId());
-
-        // save 2 → update order number
-        orderRepository.save(saved);
-
-        return "Vendor order created successfully. Order No: ODR-" + saved.getId();
-    }*/
 
 
     @Override
@@ -117,10 +74,48 @@ public class VendorOrderServiceImpl implements VendorOrderService {
         );
     }
 
-    @Override
+/*    @Override
     public List<VendorOrder> getAllOrders() {
         return orderRepository.findAll();
+    }*/
+
+
+    @Override
+    public List<VendorOrderListResponseDto> getAllOrders() {
+
+        return orderRepository.findAll().stream().map(order -> {
+
+            VendorOrderListResponseDto dto = new VendorOrderListResponseDto();
+
+            dto.setOrderId(order.getId());
+            dto.setOrderNumber(order.getOrderNumber());
+            dto.setStatus(order.getStatus());
+            dto.setOrderDate(order.getOrderDate());
+            dto.setRequiredBy(order.getRequiredBy());
+            dto.setTotalAmount(order.getTotalAmount());
+
+            dto.setVendorId(order.getVendor().getId());
+            dto.setVendorName(order.getVendor().getVendorName());
+
+            dto.setItems(
+                    order.getItems().stream().map(item -> {
+                        VendorOrderListResponseDto.OrderItemDto i =
+                                new VendorOrderListResponseDto.OrderItemDto();
+
+                        i.setMaterialId(item.getMaterial().getId());
+                        i.setMaterialName(item.getMaterial().getMaterialName());
+                        i.setUnit(item.getUnit());
+                        i.setQuantity(item.getQuantity());
+                        i.setRate(item.getRate());
+                        i.setNetAmount(item.getNetAmount());
+                        return i;
+                    }).toList()
+            );
+
+            return dto;
+        }).toList();
     }
+
 
     @Override
     public String updateOrderStatus(Long orderId, OrderStatus status) {

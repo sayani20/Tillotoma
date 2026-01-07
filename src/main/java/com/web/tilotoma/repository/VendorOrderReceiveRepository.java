@@ -1,4 +1,5 @@
 package com.web.tilotoma.repository;
+import com.web.tilotoma.entity.material.StockLedger;
 import com.web.tilotoma.entity.material.VendorOrderReceive;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,6 @@ public interface VendorOrderReceiveRepository extends JpaRepository<VendorOrderR
         WHERE r.vendorOrder.id = :orderId
     """)
     Double getTotalReceivedAmount(@Param("orderId") Long orderId);
+
+    List<StockLedger> findByMaterial_Id(Long materialId);
 }

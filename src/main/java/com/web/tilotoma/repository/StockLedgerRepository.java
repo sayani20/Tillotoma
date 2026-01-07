@@ -4,6 +4,9 @@ import com.web.tilotoma.entity.material.StockLedger;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface StockLedgerRepository
         extends JpaRepository<StockLedger, Long> {
 
@@ -18,4 +21,7 @@ public interface StockLedgerRepository
         WHERE s.material.id = :materialId
     """)
     Double getCurrentStock(Long materialId);
+    List<StockLedger> findByMaterial_Id(Long materialId);
+
+    Optional<StockLedger> findTopByMaterial_IdOrderByTxnDateDesc(Long materialId);
 }

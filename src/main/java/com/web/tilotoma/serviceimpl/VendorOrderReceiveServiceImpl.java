@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class VendorOrderReceiveServiceImpl
@@ -145,4 +148,36 @@ public class VendorOrderReceiveServiceImpl
                     return res;
                 }).toList();
     }
+
+    public List<Map<String, Object>> getMaterialStockById(Long materialId) {
+
+        List<StockLedger> ledgerList =
+                stockLedgerRepository.findByMaterial_Id(materialId);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (StockLedger sl : ledgerList) {
+
+            Material m = sl.getMaterial();
+
+            Map<String, Object> map = new LinkedHashMap<>();
+
+            // From Material
+            map.put("material_id", m.getId());
+            map.put("material_name", m.getMaterialName());
+            map.put("unit", m.getUnit());
+            map.put("brand", m.getBrand());
+
+            // From StockLedger
+            map.put("quantity", sl.getQuantity());
+            map.put("txn_type", sl.getTxnType().name());
+            map.put("txn_date", sl.getTxnDate());
+
+            result.add(map);
+        }
+
+        return result;
+    }
+
+
 }

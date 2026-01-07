@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vendor-order-receive")
@@ -70,5 +71,13 @@ public class VendorOrderReceiveController {
                             "Failed to fetch received materials",
                             null));
         }
+    }
+    @GetMapping("/materialDetails/{materialId}")
+    public ResponseEntity<List<Map<String, Object>>> getMaterialStock(
+            @PathVariable Long materialId) {
+
+        return ResponseEntity.ok(
+                receiveService.getMaterialStockById(materialId)
+        );
     }
 }

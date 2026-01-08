@@ -3,6 +3,7 @@ package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.MaterialReceiveRequestDto;
 import com.web.tilotoma.dto.MaterialReceiveResponseDto;
 import com.web.tilotoma.dto.VendorOrderReceiveDto;
+import com.web.tilotoma.dto.VendorOrderReceiveResponseDto;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.VendorOrderReceiveService;
@@ -10,7 +11,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -179,5 +182,27 @@ public class VendorOrderReceiveServiceImpl
         return result;
     }
 
+
+    @Override
+    public List<VendorOrderReceiveResponseDto> getReceivedOrders(
+            LocalDate fromDate,
+            LocalDate toDate) {
+
+        LocalDateTime fromDateTime = null;
+        LocalDateTime toDateTime = null;
+
+        if (fromDate != null) {
+            fromDateTime = fromDate.atStartOfDay();
+        }
+
+        if (toDate != null) {
+            toDateTime = toDate.atTime(LocalTime.MAX);
+        }
+
+        return receiveRepository.findReceivesBetweenDates(
+                fromDateTime,
+                toDateTime
+        );
+    }
 
 }

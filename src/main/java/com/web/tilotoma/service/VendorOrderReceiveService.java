@@ -2,7 +2,9 @@ package com.web.tilotoma.service;
 import com.web.tilotoma.dto.MaterialReceiveRequestDto;
 import com.web.tilotoma.dto.MaterialReceiveResponseDto;
 import com.web.tilotoma.dto.VendorOrderReceiveDto;
+import com.web.tilotoma.dto.VendorOrderReceiveResponseDto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -11,4 +13,9 @@ public interface  VendorOrderReceiveService {
 
     List<VendorOrderReceiveDto.ReceiveResponse> getReceivedByOrder(Long orderId);
     List<Map<String, Object>> getMaterialStockById(Long materialId);
+
+    List<VendorOrderReceiveResponseDto> getReceivedOrders(
+            LocalDate fromDate,
+            LocalDate toDate
+    );
 }

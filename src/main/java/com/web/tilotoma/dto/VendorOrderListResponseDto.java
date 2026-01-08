@@ -18,6 +18,7 @@ public class VendorOrderListResponseDto {
     private OrderStatus status;
     private LocalDate orderDate;
     private LocalDate requiredBy;
+    private String remarks;
 
     private Double totalAmount;
 
@@ -27,6 +28,7 @@ public class VendorOrderListResponseDto {
     public static class OrderItemDto {
         private Long materialId;
         private String materialName;
+        private String brand;
         private String unit;
         private Double quantity;
         private Double rate;

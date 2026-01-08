@@ -1,3 +1,4 @@
+/*
 package com.web.tilotoma.service;
 
 import com.web.tilotoma.dto.ApiResponse;
@@ -10,3 +11,4 @@ public interface ConsumptionService {
             ConsumptionRequestDto request
     );
 }
+*/

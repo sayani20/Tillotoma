@@ -100,6 +100,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
             dto.setOrderId(order.getId());
             dto.setOrderNumber(order.getOrderNumber());
             dto.setStatus(order.getStatus());
+            dto.setRemarks(order.getRemarks());
             dto.setOrderDate(order.getOrderDate());
             dto.setRequiredBy(order.getRequiredBy());
             dto.setTotalAmount(order.getTotalAmount());
@@ -119,6 +120,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
                 i.setUnit(item.getUnit());
                 i.setQuantity(item.getQuantity());
                 i.setRate(item.getRate());
+                i.setBrand(item.getBrand());
                 i.setNetAmount(item.getNetAmount());
 
                 itemDtos.add(i);

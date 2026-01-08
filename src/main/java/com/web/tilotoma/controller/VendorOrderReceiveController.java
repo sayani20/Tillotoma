@@ -1,14 +1,13 @@
 package com.web.tilotoma.controller;
 
-import com.web.tilotoma.dto.ApiResponse;
-import com.web.tilotoma.dto.MaterialReceiveRequestDto;
-import com.web.tilotoma.dto.MaterialReceiveResponseDto;
-import com.web.tilotoma.dto.VendorOrderReceiveDto;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.service.VendorOrderReceiveService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +77,31 @@ public class VendorOrderReceiveController {
 
         return ResponseEntity.ok(
                 receiveService.getMaterialStockById(materialId)
+        );
+    }
+
+
+    @GetMapping("/receivedOrderList")
+    public ResponseEntity<ApiResponse<List<VendorOrderReceiveResponseDto>>>
+    getReceivedOrders(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    ) {
+
+        List<VendorOrderReceiveResponseDto> list =
+                receiveService.getReceivedOrders(fromDate, toDate);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Received orders fetched successfully",
+                        list
+                )
         );
     }
 }

@@ -1,3 +1,4 @@
+/*
 package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.ApiResponse;
@@ -26,13 +27,15 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     @Autowired
     private ConsumptionRepository consumptionRepository;
 
-    /**
+    */
+/**
      * Consume material from stock
      * 1️⃣ Validate stock
      * 2️⃣ Save consumption
      * 3️⃣ Update stock ledger (OUT)
      * 4️⃣ Return updated stock
-     */
+     *//*
+
     @Override
     @Transactional
     public ApiResponse<ConsumptionResponseDto> consumeMaterial(
@@ -122,3 +125,4 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         );
     }
 }
+*/

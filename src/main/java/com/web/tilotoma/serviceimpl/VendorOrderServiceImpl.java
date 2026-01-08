@@ -1,4 +1,5 @@
 package com.web.tilotoma.serviceimpl;
+import com.web.tilotoma.dto.OrderHistoryResponseDto;
 import com.web.tilotoma.dto.VendorOrderDto;
 import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.*;
@@ -25,6 +26,17 @@ public class VendorOrderServiceImpl implements VendorOrderService {
     @Autowired
     private VendorOrderRepository orderRepository;
 
+    @Override
+    public List<OrderHistoryResponseDto> getOrderHistory(
+            LocalDate fromDate,
+            LocalDate toDate) {
+
+        return orderRepository.findOrderHistory(
+                OrderStatus.APPROVED,
+                fromDate,
+                toDate
+        );
+    }
 
 
 
@@ -146,4 +158,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
 
         return "Order status updated successfully";
     }
+
+
+
 }

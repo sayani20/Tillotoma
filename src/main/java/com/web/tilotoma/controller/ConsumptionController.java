@@ -5,12 +5,12 @@ import com.web.tilotoma.dto.ConsumptionRequestDto;
 import com.web.tilotoma.dto.ConsumptionResponseDto;
 import com.web.tilotoma.dto.StockResponseDto;
 
+import com.web.tilotoma.service.ConsumptionService;
 import com.web.tilotoma.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -19,11 +19,30 @@ import java.util.List;
 public class ConsumptionController {
 
 
-  /*  @Autowired
-    private ConsumptionService consumptionService;*/
+    @Autowired
+    private ConsumptionService consumptionService;
 
     @Autowired
     private StockService stockService;
+
+
+
+
+    @PostMapping("/consume")
+    public ResponseEntity<ApiResponse<ConsumptionResponseDto>> consumeMaterial(
+            @RequestBody ConsumptionRequestDto request) {
+
+        ConsumptionResponseDto response =
+                consumptionService.consumeMaterial(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Material consumed successfully",
+                        response
+                )
+        );
+    }
 
   /*  @PostMapping("/save")
     public ResponseEntity<ApiResponse<ConsumptionResponseDto>> consumeMaterial(

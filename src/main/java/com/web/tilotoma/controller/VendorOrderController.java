@@ -1,5 +1,6 @@
 package com.web.tilotoma.controller;
 import com.web.tilotoma.dto.ApiResponse;
+import com.web.tilotoma.dto.OrderHistoryResponseDto;
 import com.web.tilotoma.dto.VendorOrderDto;
 import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.VendorOrder;
@@ -90,5 +91,28 @@ public class VendorOrderController {
             return ResponseEntity.internalServerError()
                     .body(new ApiResponse<>(false, "Failed to update order status", null));
         }
+    }
+
+    @GetMapping("/orderHistory")
+    public ResponseEntity<ApiResponse<List<OrderHistoryResponseDto>>> getOrderHistory(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    ) {
+
+        List<OrderHistoryResponseDto> list =
+                orderService.getOrderHistory(fromDate, toDate);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Order history fetched successfully",
+                        list
+                )
+        );
     }
 }

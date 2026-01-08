@@ -31,6 +31,12 @@ public class VendorOrder {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @Column(name = "received_order")
+    private Boolean receivedOrder = false;
+
+    @Column(name = "approved_on")
+    private LocalDate approvedOn;
+
     private LocalDate orderDate;
     private LocalDate requiredBy;
     private String remarks;

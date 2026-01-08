@@ -109,6 +109,10 @@ public class VendorOrderReceiveServiceImpl
             paymentRepository.save(payment);
         }
 
+        // ✅ 3️⃣.5 MARK ORDER AS RECEIVED (🔥 REQUIRED CHANGE)
+        order.setReceivedOrder(true);
+        orderRepository.save(order);
+
         // 4️⃣ Final calculation (SOURCE OF TRUTH)
         Double totalReceived =
                 receiveRepository.getTotalReceivedAmount(order.getId());
@@ -183,6 +187,27 @@ public class VendorOrderReceiveServiceImpl
     }
 
 
+    /*@Override
+    public List<VendorOrderReceiveResponseDto> getReceivedOrders(
+            LocalDate fromDate,
+            LocalDate toDate) {
+
+        LocalDateTime fromDateTime = null;
+        LocalDateTime toDateTime = null;
+
+        if (fromDate != null) {
+            fromDateTime = fromDate.atStartOfDay();
+        }
+
+        if (toDate != null) {
+            toDateTime = toDate.atTime(LocalTime.MAX);
+        }
+
+        return receiveRepository.findReceivesBetweenDates(
+                fromDateTime,
+                toDateTime
+        );
+    }*/
     @Override
     public List<VendorOrderReceiveResponseDto> getReceivedOrders(
             LocalDate fromDate,

@@ -10,7 +10,9 @@ public class ConsumptionRequestDto {
 
     private Long materialId;
     private Double quantity;
-    private String area;
-    private String tower;
-    private LocalDate consDate;
+
+    private String area;    // Flat / Floor / Area
+    private String tower;   // Tower / Block
+
+    private LocalDateTime consDate; // optional
 }

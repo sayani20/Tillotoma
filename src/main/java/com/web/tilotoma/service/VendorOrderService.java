@@ -1,5 +1,6 @@
 package com.web.tilotoma.service;
 
+import com.web.tilotoma.dto.OrderHistoryResponseDto;
 import com.web.tilotoma.dto.VendorOrderDto;
 import com.web.tilotoma.dto.VendorOrderListResponseDto;
 import com.web.tilotoma.entity.material.OrderStatus;
@@ -22,6 +23,11 @@ public interface  VendorOrderService {
 
     // 🔹 NEW (with optional dates)
     List<VendorOrderListResponseDto> getAllOrders(
+            LocalDate fromDate,
+            LocalDate toDate
+    );
+
+    List<OrderHistoryResponseDto> getOrderHistory(
             LocalDate fromDate,
             LocalDate toDate
     );

@@ -9,17 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ConsumptionResponseDto {
 
-    private Long consumptionId;
-
     private Long materialId;
-    private String materialName;
-    private String unit;
-
-    private Double consumedQuantity;
-    private Double availableStockAfter;
-
-    private String tower;
-    private String area;
-
-    private LocalDateTime consumptionDate;
+    private Double consumedQty;
+    private Double remainingStock;
 }

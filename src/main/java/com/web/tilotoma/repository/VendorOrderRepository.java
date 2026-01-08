@@ -1,5 +1,7 @@
 package com.web.tilotoma.repository;
 
+import com.web.tilotoma.dto.OrderHistoryResponseDto;
+import com.web.tilotoma.entity.material.OrderStatus;
 import com.web.tilotoma.entity.material.VendorOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +23,42 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
         ORDER BY o.id DESC
     """)
     List<VendorOrder> findOrdersByDateRange(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+
+    @Query("""
+    SELECT new com.web.tilotoma.dto.OrderHistoryResponseDto(
+        o.id,
+        o.orderNumber,
+        o.orderDate,
+        o.requiredBy,
+        COUNT(i.id),
+        o.totalAmount,
+        o.remarks,
+        o.status,
+        o.approvedOn
+    )
+    FROM VendorOrder o
+    LEFT JOIN o.items i
+    WHERE o.status = :status
+      AND o.receivedOrder = true
+      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+      AND (:toDate IS NULL OR o.orderDate <= :toDate)
+    GROUP BY
+        o.id,
+        o.orderNumber,
+        o.orderDate,
+        o.requiredBy,
+        o.totalAmount,
+        o.remarks,
+        o.status,
+        o.approvedOn
+    ORDER BY o.orderDate DESC
+""")
+    List<OrderHistoryResponseDto> findOrderHistory(
+            @Param("status") OrderStatus status,
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate
     );

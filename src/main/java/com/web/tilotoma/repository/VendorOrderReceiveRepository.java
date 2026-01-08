@@ -22,7 +22,7 @@ public interface VendorOrderReceiveRepository extends JpaRepository<VendorOrderR
     List<StockLedger> findByMaterial_Id(Long materialId);
 
 
-    @Query("""
+   /* @Query("""
         SELECT new com.web.tilotoma.dto.VendorOrderReceiveResponseDto(
             r.id,
             o.id,
@@ -43,6 +43,29 @@ public interface VendorOrderReceiveRepository extends JpaRepository<VendorOrderR
           AND (:toDate IS NULL OR r.receivedOn <= :toDate)
         ORDER BY r.receivedOn DESC
     """)
+    List<VendorOrderReceiveResponseDto> findReceivesBetweenDates(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
+    );*/
+
+
+    @Query("""
+    SELECT new com.web.tilotoma.dto.VendorOrderReceiveResponseDto(
+        MIN(r.id),
+        o.id,
+        r.challanNumber,
+        v.vendorName,
+        DATE(r.receivedOn),
+        COUNT(r.id)
+    )
+    FROM VendorOrderReceive r
+    JOIN r.vendorOrder o
+    JOIN o.vendor v
+    WHERE (:fromDate IS NULL OR r.receivedOn >= :fromDate)
+      AND (:toDate IS NULL OR r.receivedOn <= :toDate)
+    GROUP BY o.id, r.challanNumber, v.vendorName, DATE(r.receivedOn)
+    ORDER BY MAX(r.receivedOn) DESC
+""")
     List<VendorOrderReceiveResponseDto> findReceivesBetweenDates(
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate

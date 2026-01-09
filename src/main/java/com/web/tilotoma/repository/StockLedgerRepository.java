@@ -40,7 +40,7 @@ public interface StockLedgerRepository
 """)
     Double getAvailableStock(Long materialId);
 
-    @Query("""
+    /*@Query("""
         SELECT new com.web.tilotoma.dto.StockResponseDto(
             m.id,
             m.materialName,
@@ -65,6 +65,39 @@ public interface StockLedgerRepository
         ) > 0
         ORDER BY MAX(s.txnDate) DESC
     """)
+    List<StockResponseDto> getCurrentStock();*/
+
+    @Query("""
+    SELECT new com.web.tilotoma.dto.StockResponseDto(
+        m.id,
+        m.materialName,
+        m.unit,
+        m.brand,
+        MAX(s.txnDate),
+        SUM(
+            CASE 
+                WHEN s.txnType = 'IN' THEN s.quantity
+                ELSE -s.quantity
+            END
+        ),
+        m.minimumLimit
+    )
+    FROM StockLedger s
+    JOIN s.material m
+    GROUP BY 
+        m.id,
+        m.materialName,
+        m.unit,
+        m.brand,
+        m.minimumLimit
+    HAVING SUM(
+        CASE 
+            WHEN s.txnType = 'IN' THEN s.quantity
+            ELSE -s.quantity
+        END
+    ) > 0
+    ORDER BY MAX(s.txnDate) DESC
+""")
     List<StockResponseDto> getCurrentStock();
 
     @Query("""

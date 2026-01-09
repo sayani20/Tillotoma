@@ -116,7 +116,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
             dto.setOrderDate(order.getOrderDate());
             dto.setRequiredBy(order.getRequiredBy());
             dto.setTotalAmount(order.getTotalAmount());
-
+            dto.setReceivedOrder(order.getReceivedOrder());
             dto.setVendorId(order.getVendor().getId());
             dto.setVendorName(order.getVendor().getVendorName());
 

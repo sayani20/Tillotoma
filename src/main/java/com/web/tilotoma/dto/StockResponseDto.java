@@ -16,6 +16,7 @@ public class StockResponseDto {
     private LocalDateTime lastUpdatedOn;
 
     private Double availableQuantity;
+    private Double minimumQuantity;
 
     // 🔹 constructor for JPQL projection
     public StockResponseDto(
@@ -24,7 +25,8 @@ public class StockResponseDto {
             String unit,
             String brand,
             LocalDateTime lastUpdatedOn,
-            Double availableQuantity
+            Double availableQuantity,
+            Double minimumQuantity
     ) {
         this.materialId = materialId;
         this.materialName = materialName;
@@ -32,5 +34,6 @@ public class StockResponseDto {
         this.brand = brand;
         this.lastUpdatedOn = lastUpdatedOn;
         this.availableQuantity = availableQuantity;
+        this.minimumQuantity = minimumQuantity;
     }
 }

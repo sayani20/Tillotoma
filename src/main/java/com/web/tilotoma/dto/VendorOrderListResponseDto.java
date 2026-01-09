@@ -19,7 +19,7 @@ public class VendorOrderListResponseDto {
     private LocalDate orderDate;
     private LocalDate requiredBy;
     private String remarks;
-
+    private Boolean receivedOrder;
     private Double totalAmount;
 
     private List<OrderItemDto> items;

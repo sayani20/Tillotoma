@@ -1,6 +1,7 @@
 package com.web.tilotoma.repository;
 
 import com.web.tilotoma.dto.OrderHistoryResponseDto;
+import com.web.tilotoma.dto.VendorBillReportResponseDto;
 import com.web.tilotoma.entity.material.OrderStatus;
 import com.web.tilotoma.entity.material.VendorOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -62,5 +63,87 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate
     );
+
+
+
+    /*@Query("""
+        SELECT new com.web.tilotoma.dto.VendorBillReportResponseDto(
+            v.id,
+            v.vendorName,
+            o.id,
+            o.orderNumber,
+            MAX(r.challanNumber),
+            SUM(r.receivedAmount),
+            COALESCE(SUM(p.paidAmount), 0),
+            (SUM(r.receivedAmount) - COALESCE(SUM(p.paidAmount), 0)),
+            (SUM(r.receivedAmount) - COALESCE(SUM(p.paidAmount), 0)),
+            o.orderDate
+        )
+        FROM VendorOrder o
+        JOIN o.vendor v
+        JOIN VendorOrderReceive r ON r.vendorOrder.id = o.id
+        LEFT JOIN VendorPayment p ON p.vendorOrder.id = o.id
+        WHERE o.receivedOrder = true
+          AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+          AND (:toDate IS NULL OR o.orderDate <= :toDate)
+        GROUP BY
+            v.id,
+            v.vendorName,
+            o.id,
+            o.orderNumber,
+            o.orderDate
+        ORDER BY o.orderDate DESC
+    """)
+    List<VendorBillReportResponseDto> getVendorBillReport(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );*/
+
+    @Query("""
+    SELECT
+        v.id,
+        v.vendorName,
+        o.id,
+        o.orderNumber,
+
+        /* challan number */
+        (
+            SELECT MAX(r.challanNumber)
+            FROM VendorOrderReceive r
+            WHERE r.vendorOrder.id = o.id
+        ),
+
+        /* total received amount */
+        (
+            SELECT COALESCE(SUM(r.receivedAmount), 0)
+            FROM VendorOrderReceive r
+            WHERE r.vendorOrder.id = o.id
+        ),
+
+        /* total paid amount */
+        (
+            SELECT COALESCE(SUM(p.paidAmount), 0)
+            FROM VendorPayment p
+            WHERE p.vendorOrder.id = o.id
+        ),
+
+        o.orderDate
+    FROM VendorOrder o
+    JOIN o.vendor v
+    WHERE o.receivedOrder = true
+      AND o.status = com.web.tilotoma.entity.material.OrderStatus.APPROVED
+      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+      AND (:toDate IS NULL OR o.orderDate <= :toDate)
+    ORDER BY v.id, o.orderDate
+""")
+    List<Object[]> getVendorBillRaw(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+
+
+
+
 }
 

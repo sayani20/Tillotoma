@@ -2,8 +2,11 @@ package com.web.tilotoma.controller;
 
 
 import com.web.tilotoma.dto.ApiResponse;
+import com.web.tilotoma.dto.VendorOrderItemUpdateRequest;
+import com.web.tilotoma.dto.VendorOrderItemUpdateResponse;
 import com.web.tilotoma.dto.VendorRequestDto;
 import com.web.tilotoma.entity.material.Vendor;
+import com.web.tilotoma.service.VendorOrderService;
 import com.web.tilotoma.service.VendorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,9 @@ public class VendorController {
 
     @Autowired
     private VendorService vendorService;
+
+    @Autowired
+    private VendorOrderService vendorOrderService;
 
     // ➕ Add Vendor
     @PostMapping("/addVendor")
@@ -69,4 +75,17 @@ public class VendorController {
                 new ApiResponse<>(true, "Active vendors fetched successfully", list)
         );
     }
+
+    @PutMapping("/update-order-items")
+    public ResponseEntity<ApiResponse<VendorOrderItemUpdateResponse>> updateOrderItems(
+            @RequestBody VendorOrderItemUpdateRequest request) {
+
+        VendorOrderItemUpdateResponse response =
+                vendorOrderService.updateOrderItems(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order updated successfully", response)
+        );
+    }
+
 }

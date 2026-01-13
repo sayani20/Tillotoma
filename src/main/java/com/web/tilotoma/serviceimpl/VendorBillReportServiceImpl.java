@@ -3,6 +3,7 @@ package com.web.tilotoma.serviceimpl;
 
 import com.web.tilotoma.dto.VendorBillReportResponseDto;
 import com.web.tilotoma.repository.VendorOrderRepository;
+import com.web.tilotoma.repository.VendorPaymentRepository;
 import com.web.tilotoma.service.VendorBillReportService;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ import java.util.*;
 public class VendorBillReportServiceImpl implements VendorBillReportService {
 
     private final VendorOrderRepository vendorOrderRepository;
-
+    private final VendorPaymentRepository paymentRepository;
     @Override
     public List<VendorBillReportResponseDto> getVendorBillReport(
             LocalDate fromDate,
@@ -54,6 +55,7 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
                     previousFinal + regularBalance;
 
             vendorBalanceMap.put(vendorId, finalBalance);
+            String paymentMode ="";
 
             response.add(
                     new VendorBillReportResponseDto(
@@ -64,6 +66,7 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
                             challanNumber,
                             orderAmount,
                             paidAmount,
+                            "",
                             regularBalance,
                             finalBalance,
                             orderDate

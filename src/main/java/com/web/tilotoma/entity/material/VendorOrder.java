@@ -45,6 +45,8 @@ public class VendorOrder {
     /*@OneToMany(mappedBy = "vendorOrder", cascade = CascadeType.ALL)
     private List<VendorOrderItem> items;*/
 
+    @Column(name = "is_edited")
+    private Boolean isEdited = false;
 
     @OneToMany(
             mappedBy = "vendorOrder",

@@ -20,7 +20,7 @@ public class VendorBillReportResponseDto {
 
     private Double totalAmount;     // order amount (received)
     private Double paidAmount;
-
+    private String paymentMode;
     private Double regularBalance;  // paid - orderAmount
     private Double finalBalance;    // running vendor balance
 

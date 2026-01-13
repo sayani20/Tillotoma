@@ -1,7 +1,5 @@
 package com.web.tilotoma.serviceimpl;
-import com.web.tilotoma.dto.OrderHistoryResponseDto;
-import com.web.tilotoma.dto.VendorOrderDto;
-import com.web.tilotoma.dto.VendorOrderListResponseDto;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.VendorOrderService;
@@ -159,6 +157,55 @@ public class VendorOrderServiceImpl implements VendorOrderService {
         return "Order status updated successfully";
     }
 
+    @Override
+    @Transactional
+    public VendorOrderItemUpdateResponse updateOrderItems(
+            VendorOrderItemUpdateRequest request) {
+
+        VendorOrder order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // ✅ Vendor validation
+        if (!order.getVendor().getId().equals(request.getVendorId())) {
+            throw new RuntimeException("Vendor does not match this order");
+        }
+
+        // ❌ Approved order cannot be edited
+        if (order.getStatus() == OrderStatus.APPROVED) {
+            throw new RuntimeException("Approved order cannot be edited");
+        }
+
+        double updatedTotal = 0;
+
+        for (VendorOrderItemUpdateRequest.Item reqItem : request.getItems()) {
+
+            VendorOrderItem item = order.getItems().stream()
+                    .filter(i -> i.getId().equals(reqItem.getOrderItemId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Order item not found"));
+
+            item.setQuantity(reqItem.getQuantity());
+            item.setRate(reqItem.getRate());
+            item.setBrand(reqItem.getBrand());
+
+            double net = reqItem.getQuantity() * reqItem.getRate();
+            item.setNetAmount(net);
+
+            updatedTotal += net;
+        }
+
+        order.setTotalAmount(updatedTotal);
+        order.setIsEdited(true);
+
+        orderRepository.save(order);
+
+        return new VendorOrderItemUpdateResponse(
+                order.getId(),
+                order.getIsEdited(),
+                order.getTotalAmount(),
+                "Order items updated"
+        );
+    }
 
 
 }

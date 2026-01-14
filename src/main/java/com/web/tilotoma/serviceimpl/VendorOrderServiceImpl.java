@@ -1,4 +1,5 @@
 package com.web.tilotoma.serviceimpl;
+
 import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
@@ -35,7 +36,6 @@ public class VendorOrderServiceImpl implements VendorOrderService {
                 toDate
         );
     }
-
 
 
     @Override
@@ -124,7 +124,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
             for (VendorOrderItem item : order.getItems()) {
                 VendorOrderListResponseDto.OrderItemDto i =
                         new VendorOrderListResponseDto.OrderItemDto();
-
+                i.setOrderItemId(item.getId());
                 i.setMaterialId(item.getMaterial().getId());
                 i.setMaterialName(item.getMaterial().getMaterialName());
                 i.setUnit(item.getUnit());
@@ -142,7 +142,6 @@ public class VendorOrderServiceImpl implements VendorOrderService {
 
         return response;
     }
-
 
 
     @Override

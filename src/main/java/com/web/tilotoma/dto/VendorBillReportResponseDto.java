@@ -2,12 +2,10 @@ package com.web.tilotoma.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class VendorBillReportResponseDto {
 
@@ -16,12 +14,15 @@ public class VendorBillReportResponseDto {
 
     private Long orderId;
     private String orderNumber;
+
     private String challanNumber;
 
-    private Double totalAmount;     // order amount (received)
+    private Double totalAmount;     // received amount
     private Double paidAmount;
-    private String paymentMode;
-    private Double regularBalance;  // paid - orderAmount
+
+    private String paymentMode;     // CASH / UPI / BANK / MULTIPLE
+
+    private Double regularBalance;  // paid - total
     private Double finalBalance;    // running vendor balance
 
     private LocalDate orderDate;

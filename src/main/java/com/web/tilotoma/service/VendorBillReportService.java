@@ -10,10 +10,7 @@ import java.util.List;
 
 public interface VendorBillReportService {
 
-    /*List<VendorBillReportResponseDto> getVendorBillReport(
-            LocalDate fromDate,
-            LocalDate toDate
-    );*/
+
 
     List<VendorBillReportResponseDto> getVendorBillReport(
             LocalDate fromDate,

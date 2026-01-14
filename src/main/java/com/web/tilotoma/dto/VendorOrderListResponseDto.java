@@ -26,6 +26,8 @@ public class VendorOrderListResponseDto {
 
     @Data
     public static class OrderItemDto {
+        private Long orderItemId;
+
         private Long materialId;
         private String materialName;
         private String brand;

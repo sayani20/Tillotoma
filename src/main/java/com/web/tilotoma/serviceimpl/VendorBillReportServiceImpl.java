@@ -36,26 +36,43 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
 
         for (Object[] r : rows) {
 
-            Long vendorId = (Long) r[0];
+            Long vendorId = ((Number) r[0]).longValue();
             String vendorName = (String) r[1];
-            Long orderId = (Long) r[2];
+            Long orderId = ((Number) r[2]).longValue();
             String orderNumber = (String) r[3];
             String challanNumber = (String) r[4];
-            Double orderAmount = (Double) r[5];
-            Double paidAmount = (Double) r[6];
-            LocalDate orderDate = (LocalDate) r[7];
 
-            // 🧮 BUSINESS RULE
-            double regularBalance = paidAmount - orderAmount;
+            Double totalAmount =
+                    r[5] == null ? 0.0 : ((Number) r[5]).doubleValue();
+
+            Double paidAmount =
+                    r[6] == null ? 0.0 : ((Number) r[6]).doubleValue();
+
+            String paymentMode = (String) r[7];
+
+            // 🔥 SAFE LocalDate handling (NO ClassCastException)
+            LocalDate orderDate;
+            Object dateObj = r[8];
+
+            if (dateObj instanceof LocalDate) {
+                orderDate = (LocalDate) dateObj;
+            } else if (dateObj instanceof java.sql.Date) {
+                orderDate = ((java.sql.Date) dateObj).toLocalDate();
+            } else if (dateObj instanceof String) {
+                orderDate = LocalDate.parse((String) dateObj);
+            } else {
+                orderDate = null;
+            }
+
+            // 🧮 BUSINESS LOGIC
+            double regularBalance = paidAmount - totalAmount;
 
             double previousFinal =
                     vendorBalanceMap.getOrDefault(vendorId, 0.0);
 
-            double finalBalance =
-                    previousFinal + regularBalance;
+            double finalBalance = previousFinal + regularBalance;
 
             vendorBalanceMap.put(vendorId, finalBalance);
-            String paymentMode ="";
 
             response.add(
                     new VendorBillReportResponseDto(
@@ -64,9 +81,9 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
                             orderId,
                             orderNumber,
                             challanNumber,
-                            orderAmount,
+                            totalAmount,
                             paidAmount,
-                            "",
+                            paymentMode,
                             regularBalance,
                             finalBalance,
                             orderDate

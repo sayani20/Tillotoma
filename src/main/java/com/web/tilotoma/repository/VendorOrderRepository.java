@@ -100,42 +100,54 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
     );*/
 
     @Query("""
-    SELECT
-        v.id,
-        v.vendorName,
-        o.id,
-        o.orderNumber,
+        SELECT
+            v.id,
+            v.vendorName,
+            o.id,
+            o.orderNumber,
 
-        /* challan number */
-        (
-            SELECT MAX(r.challanNumber)
-            FROM VendorOrderReceive r
-            WHERE r.vendorOrder.id = o.id
-        ),
+            /* challan number */
+            (
+                SELECT MAX(r.challanNumber)
+                FROM VendorOrderReceive r
+                WHERE r.vendorOrder.id = o.id
+            ),
 
-        /* total received amount */
-        (
-            SELECT COALESCE(SUM(r.receivedAmount), 0)
-            FROM VendorOrderReceive r
-            WHERE r.vendorOrder.id = o.id
-        ),
+            /* total received amount */
+            (
+                SELECT COALESCE(SUM(r.receivedAmount), 0)
+                FROM VendorOrderReceive r
+                WHERE r.vendorOrder.id = o.id
+            ),
 
-        /* total paid amount */
-        (
-            SELECT COALESCE(SUM(p.paidAmount), 0)
-            FROM VendorPayment p
-            WHERE p.vendorOrder.id = o.id
-        ),
+            /* total paid amount */
+            (
+                SELECT COALESCE(SUM(p.paidAmount), 0)
+                FROM VendorPayment p
+                WHERE p.vendorOrder.id = o.id
+            ),
 
-        o.orderDate
-    FROM VendorOrder o
-    JOIN o.vendor v
-    WHERE o.receivedOrder = true
-      AND o.status = com.web.tilotoma.entity.material.OrderStatus.APPROVED
-      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
-      AND (:toDate IS NULL OR o.orderDate <= :toDate)
-    ORDER BY v.id, o.orderDate
-""")
+            /* payment mode summary */
+            (
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT p.paymentMode) > 1
+                            THEN 'MULTIPLE'
+                        ELSE MAX(p.paymentMode)
+                    END
+                FROM VendorPayment p
+                WHERE p.vendorOrder.id = o.id
+            ),
+
+            o.orderDate
+        FROM VendorOrder o
+        JOIN o.vendor v
+        WHERE o.receivedOrder = true
+          AND o.status = com.web.tilotoma.entity.material.OrderStatus.APPROVED
+          AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+          AND (:toDate IS NULL OR o.orderDate <= :toDate)
+        ORDER BY v.id, o.orderDate
+    """)
     List<Object[]> getVendorBillRaw(
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate

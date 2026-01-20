@@ -62,4 +62,19 @@ public class ConsumptionController {
                 new ApiResponse<>(true, "Current stock fetched successfully", stock)
         );
     }
+    @GetMapping("/getConsumption/{materialId}")
+    public ResponseEntity<ApiResponse<List<ConsumptionRequestDto>>> getByMaterial(
+            @PathVariable Long materialId) {
+
+        List<ConsumptionRequestDto> list =
+                consumptionService.getConsumptionByMaterial(materialId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Consumption list fetched successfully",
+                        list
+                )
+        );
+    }
 }

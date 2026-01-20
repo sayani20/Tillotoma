@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ConsumptionServiceImpl implements ConsumptionService {
@@ -82,6 +83,24 @@ public class ConsumptionServiceImpl implements ConsumptionService {
                 request.getQuantity(),
                 remainingStock
         );
+    }
+
+    @Override
+    public List<ConsumptionRequestDto> getConsumptionByMaterial(Long materialId) {
+
+        return consumptionRepository
+                .findByMaterial_Id(materialId)
+                .stream()
+                .map(c -> ConsumptionRequestDto.builder()
+                        .consumptionId(c.getId())
+                        .materialId(c.getMaterial().getId())
+                        .quantity(c.getQuantity())
+                        .area(c.getArea())
+                        .tower(c.getTower())
+                        .consDate(c.getConsDate())
+                        .build()
+                )
+                .toList();
     }
 }
 

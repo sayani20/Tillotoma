@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -21,4 +22,9 @@ public class OrderHistoryResponseDto {
     private String remarks;
     private OrderStatus status;
     private LocalDate approvedOn;
+    private String vendorName;
+    private String challanNumber;
+    private LocalDateTime receivedOn;
+    private String orderReceivedType;
+
 }

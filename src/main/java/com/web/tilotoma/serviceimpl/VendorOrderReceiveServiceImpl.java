@@ -74,6 +74,7 @@ public class VendorOrderReceiveServiceImpl
                     .receivedRate(item.getRate())
                     .receivedAmount(amount)
                     .challanNumber(request.getChallanNumber())
+                    .orderReceivedType(request.getOrderReceivedType())
                     .receivedOn(LocalDateTime.now())
                     .build();
 

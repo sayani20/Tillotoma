@@ -29,35 +29,7 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
     );
 
 
-   /* @Query("""
-    SELECT new com.web.tilotoma.dto.OrderHistoryResponseDto(
-        o.id,
-        o.orderNumber,
-        o.orderDate,
-        o.requiredBy,
-        COUNT(i.id),
-        o.totalAmount,
-        o.remarks,
-        o.status,
-        o.approvedOn
-    )
-    FROM VendorOrder o
-    LEFT JOIN o.items i
-    WHERE o.status = :status
-      AND o.receivedOrder = true
-      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
-      AND (:toDate IS NULL OR o.orderDate <= :toDate)
-    GROUP BY
-        o.id,
-        o.orderNumber,
-        o.orderDate,
-        o.requiredBy,
-        o.totalAmount,
-        o.remarks,
-        o.status,
-        o.approvedOn
-    ORDER BY o.orderDate DESC
-""")*/
+
 
     @Query("""
     SELECT new com.web.tilotoma.dto.OrderHistoryResponseDto(
@@ -65,35 +37,21 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
         o.orderNumber,
         o.orderDate,
         o.requiredBy,
-
         COUNT(DISTINCT i.id),
         o.totalAmount,
         o.remarks,
         o.status,
         o.approvedOn,
-
         v.vendorName,
-
-        /* challan number */
-        (
-            SELECT MAX(r.challanNumber)
-            FROM VendorOrderReceive r
-            WHERE r.vendorOrder.id = o.id
-        ),
-
-        /* received on */
-        (
-            SELECT MAX(r.receivedOn)
-            FROM VendorOrderReceive r
-            WHERE r.vendorOrder.id = o.id
-        ),
-
-        /* received type */
-        (
-            SELECT MAX(r.orderReceivedType)
-            FROM VendorOrderReceive r
-            WHERE r.vendorOrder.id = o.id
-        )
+        (SELECT MAX(r.challanNumber)
+         FROM VendorOrderReceive r
+         WHERE r.vendorOrder.id = o.id),
+        (SELECT MAX(r.receivedOn)
+         FROM VendorOrderReceive r
+         WHERE r.vendorOrder.id = o.id),
+        (SELECT MAX(r.orderReceivedType)
+         FROM VendorOrderReceive r
+         WHERE r.vendorOrder.id = o.id)
     )
     FROM VendorOrder o
     JOIN o.vendor v
@@ -114,6 +72,8 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
         v.vendorName
     ORDER BY o.orderDate DESC
 """)
+
+
     List<OrderHistoryResponseDto> findOrderHistory(
             @Param("status") OrderStatus status,
             @Param("fromDate") LocalDate fromDate,
@@ -122,38 +82,7 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
 
 
 
-    /*@Query("""
-        SELECT new com.web.tilotoma.dto.VendorBillReportResponseDto(
-            v.id,
-            v.vendorName,
-            o.id,
-            o.orderNumber,
-            MAX(r.challanNumber),
-            SUM(r.receivedAmount),
-            COALESCE(SUM(p.paidAmount), 0),
-            (SUM(r.receivedAmount) - COALESCE(SUM(p.paidAmount), 0)),
-            (SUM(r.receivedAmount) - COALESCE(SUM(p.paidAmount), 0)),
-            o.orderDate
-        )
-        FROM VendorOrder o
-        JOIN o.vendor v
-        JOIN VendorOrderReceive r ON r.vendorOrder.id = o.id
-        LEFT JOIN VendorPayment p ON p.vendorOrder.id = o.id
-        WHERE o.receivedOrder = true
-          AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
-          AND (:toDate IS NULL OR o.orderDate <= :toDate)
-        GROUP BY
-            v.id,
-            v.vendorName,
-            o.id,
-            o.orderNumber,
-            o.orderDate
-        ORDER BY o.orderDate DESC
-    """)
-    List<VendorBillReportResponseDto> getVendorBillReport(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );*/
+
 
     @Query("""
         SELECT

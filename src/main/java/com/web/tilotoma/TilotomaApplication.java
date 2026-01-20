@@ -11,5 +11,4 @@ public class TilotomaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TilotomaApplication.class, args);
 	}
-
 }

@@ -151,6 +151,10 @@ public class VendorOrderServiceImpl implements VendorOrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setStatus(status);
+        // ✅ only when APPROVED
+        if (status == OrderStatus.APPROVED) {
+            order.setApprovedOn(LocalDate.now());
+        }
         orderRepository.save(order);
 
         return "Order status updated successfully";

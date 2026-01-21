@@ -72,6 +72,9 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
 
             double finalBalance = previousFinal + regularBalance;
 
+            String materialCategoryName = (String) r[9];
+
+
             vendorBalanceMap.put(vendorId, finalBalance);
 
             response.add(
@@ -86,7 +89,8 @@ public class VendorBillReportServiceImpl implements VendorBillReportService {
                             paymentMode,
                             regularBalance,
                             finalBalance,
-                            orderDate
+                            orderDate,
+                            materialCategoryName
                     )
             );
         }

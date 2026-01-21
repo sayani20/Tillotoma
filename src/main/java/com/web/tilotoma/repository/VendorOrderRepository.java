@@ -85,54 +85,50 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
 
 
     @Query("""
-        SELECT
-            v.id,
-            v.vendorName,
-            o.id,
-            o.orderNumber,
+    SELECT
+        v.id,
+        v.vendorName,
+        o.id,
+        o.orderNumber,
 
-            /* challan number */
-            (
-                SELECT MAX(r.challanNumber)
-                FROM VendorOrderReceive r
-                WHERE r.vendorOrder.id = o.id
-            ),
+        (SELECT MAX(r1.challanNumber)
+         FROM VendorOrderReceive r1
+         WHERE r1.vendorOrder.id = o.id),
 
-            /* total received amount */
-            (
-                SELECT COALESCE(SUM(r.receivedAmount), 0)
-                FROM VendorOrderReceive r
-                WHERE r.vendorOrder.id = o.id
-            ),
+        (SELECT COALESCE(SUM(r2.receivedAmount), 0)
+         FROM VendorOrderReceive r2
+         WHERE r2.vendorOrder.id = o.id),
 
-            /* total paid amount */
-            (
-                SELECT COALESCE(SUM(p.paidAmount), 0)
-                FROM VendorPayment p
-                WHERE p.vendorOrder.id = o.id
-            ),
+        (SELECT COALESCE(SUM(p.paidAmount), 0)
+         FROM VendorPayment p
+         WHERE p.vendorOrder.id = o.id),
 
-            /* payment mode summary */
-            (
-                SELECT
-                    CASE
-                        WHEN COUNT(DISTINCT p.paymentMode) > 1
-                            THEN 'MULTIPLE'
-                        ELSE MAX(p.paymentMode)
-                    END
-                FROM VendorPayment p
-                WHERE p.vendorOrder.id = o.id
-            ),
+        (SELECT
+            CASE
+                WHEN COUNT(DISTINCT p2.paymentMode) > 1
+                    THEN 'MULTIPLE'
+                ELSE MAX(p2.paymentMode)
+            END
+         FROM VendorPayment p2
+         WHERE p2.vendorOrder.id = o.id),
 
-            o.orderDate
-        FROM VendorOrder o
-        JOIN o.vendor v
-        WHERE o.receivedOrder = true
-          AND o.status = com.web.tilotoma.entity.material.OrderStatus.APPROVED
-          AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
-          AND (:toDate IS NULL OR o.orderDate <= :toDate)
-        ORDER BY v.id, o.orderDate
-    """)
+        o.orderDate,
+        mc.name
+    FROM VendorOrder o
+    JOIN o.vendor v
+    JOIN VendorOrderReceive r ON r.vendorOrder.id = o.id
+    JOIN r.material m
+    JOIN m.materialCategory mc
+    WHERE o.receivedOrder = true
+      AND o.status = com.web.tilotoma.entity.material.OrderStatus.APPROVED
+      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+      AND (:toDate IS NULL OR o.orderDate <= :toDate)
+    GROUP BY
+        v.id, v.vendorName,
+        o.id, o.orderNumber, o.orderDate,
+        mc.name
+    ORDER BY v.id, o.orderDate
+""")
     List<Object[]> getVendorBillRaw(
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate

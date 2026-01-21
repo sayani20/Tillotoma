@@ -26,4 +26,6 @@ public class VendorBillReportResponseDto {
     private Double finalBalance;    // running vendor balance
 
     private LocalDate orderDate;
+
+    private String materialCategoryName;
 }

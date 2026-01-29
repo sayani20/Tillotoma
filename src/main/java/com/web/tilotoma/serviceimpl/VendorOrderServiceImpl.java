@@ -3,6 +3,7 @@ package com.web.tilotoma.serviceimpl;
 import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
+import com.web.tilotoma.service.OrderHistoryProjection;
 import com.web.tilotoma.service.VendorOrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class VendorOrderServiceImpl implements VendorOrderService {
     @Autowired
     private VendorOrderRepository orderRepository;
 
-    @Override
+    /*@Override
     public List<OrderHistoryResponseDto> getOrderHistory(
             LocalDate fromDate,
             LocalDate toDate) {
@@ -35,6 +36,39 @@ public class VendorOrderServiceImpl implements VendorOrderService {
                 fromDate,
                 toDate
         );
+    }*/
+
+    @Override
+    public List<OrderHistoryResponseDto> getOrderHistory(
+            LocalDate fromDate,
+            LocalDate toDate) {
+
+        List<OrderHistoryProjection> projections =
+                orderRepository.findOrderHistory(
+                        OrderStatus.APPROVED,
+                        fromDate,
+                        toDate
+                );
+
+        // 🔥 DTO mapping HERE (ServiceImpl)
+        return projections.stream()
+                .map(p -> new OrderHistoryResponseDto(
+                        p.getOrderId(),
+                        p.getOrderNumber(),
+                        p.getOrderDate(),
+                        p.getRequiredBy(),
+                        p.getNoOfItems(),
+                        p.getTotalAmount(),
+                        p.getPaidAmount(),
+                        p.getRemarks(),
+                        p.getStatus(),
+                        p.getApprovedOn(),
+                        p.getVendorName(),
+                        p.getChallanNumber(),
+                        p.getReceivedOn(),
+                        p.getOrderReceivedType()
+                ))
+                .toList();
     }
 
 

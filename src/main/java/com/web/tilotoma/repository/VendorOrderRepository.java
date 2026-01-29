@@ -4,6 +4,7 @@ import com.web.tilotoma.dto.OrderHistoryResponseDto;
 import com.web.tilotoma.dto.VendorBillReportResponseDto;
 import com.web.tilotoma.entity.material.OrderStatus;
 import com.web.tilotoma.entity.material.VendorOrder;
+import com.web.tilotoma.service.OrderHistoryProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,53 +33,87 @@ public interface VendorOrderRepository extends JpaRepository<VendorOrder, Long> 
 
 
     @Query("""
-    SELECT new com.web.tilotoma.dto.OrderHistoryResponseDto(
-        o.id,
-        o.orderNumber,
-        o.orderDate,
-        o.requiredBy,
-        COUNT(DISTINCT i.id),
-        o.totalAmount,
-        o.remarks,
-        o.status,
-        o.approvedOn,
-        v.vendorName,
-        (SELECT MAX(r.challanNumber)
-         FROM VendorOrderReceive r
-         WHERE r.vendorOrder.id = o.id),
-        (SELECT MAX(r.receivedOn)
-         FROM VendorOrderReceive r
-         WHERE r.vendorOrder.id = o.id),
-        (SELECT MAX(r.orderReceivedType)
-         FROM VendorOrderReceive r
-         WHERE r.vendorOrder.id = o.id)
-    )
-    FROM VendorOrder o
-    JOIN o.vendor v
-    LEFT JOIN o.items i
-    WHERE o.status = :status
-      AND o.receivedOrder = true
-      AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
-      AND (:toDate IS NULL OR o.orderDate <= :toDate)
-    GROUP BY
-        o.id,
-        o.orderNumber,
-        o.orderDate,
-        o.requiredBy,
-        o.totalAmount,
-        o.remarks,
-        o.status,
-        o.approvedOn,
-        v.vendorName
-    ORDER BY o.orderDate DESC
+SELECT
+    o.id                AS orderId,
+    o.orderNumber       AS orderNumber,
+    o.orderDate         AS orderDate,
+    o.requiredBy        AS requiredBy,
+    COUNT(DISTINCT i.id) AS noOfItems,
+    o.totalAmount       AS totalAmount,
+
+    (SELECT r1.receivedAmount
+     FROM VendorOrderReceive r1
+     WHERE r1.vendorOrder.id = o.id
+       AND r1.receivedOn = (
+           SELECT MAX(r2.receivedOn)
+           FROM VendorOrderReceive r2
+           WHERE r2.vendorOrder.id = o.id
+       )
+    ) AS paidAmount,
+
+    (SELECT r3.remarks
+     FROM VendorOrderReceive r3
+     WHERE r3.vendorOrder.id = o.id
+       AND r3.receivedOn = (
+           SELECT MAX(r4.receivedOn)
+           FROM VendorOrderReceive r4
+           WHERE r4.vendorOrder.id = o.id
+       )
+    ) AS remarks,
+
+    o.status            AS status,
+    o.approvedOn        AS approvedOn,
+    v.vendorName        AS vendorName,
+
+    (SELECT r5.challanNumber
+     FROM VendorOrderReceive r5
+     WHERE r5.vendorOrder.id = o.id
+       AND r5.receivedOn = (
+           SELECT MAX(r6.receivedOn)
+           FROM VendorOrderReceive r6
+           WHERE r6.vendorOrder.id = o.id
+       )
+    ) AS challanNumber,
+
+    (SELECT MAX(r7.receivedOn)
+     FROM VendorOrderReceive r7
+     WHERE r7.vendorOrder.id = o.id
+    ) AS receivedOn,
+
+    (SELECT r8.orderReceivedType
+     FROM VendorOrderReceive r8
+     WHERE r8.vendorOrder.id = o.id
+       AND r8.receivedOn = (
+           SELECT MAX(r9.receivedOn)
+           FROM VendorOrderReceive r9
+           WHERE r9.vendorOrder.id = o.id
+       )
+    ) AS orderReceivedType
+
+FROM VendorOrder o
+JOIN o.vendor v
+LEFT JOIN o.items i
+WHERE o.status = :status
+  AND o.receivedOrder = true
+  AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+  AND (:toDate IS NULL OR o.orderDate <= :toDate)
+GROUP BY
+    o.id,
+    o.orderNumber,
+    o.orderDate,
+    o.requiredBy,
+    o.totalAmount,
+    o.status,
+    o.approvedOn,
+    v.vendorName
+ORDER BY o.orderDate DESC
 """)
-
-
-    List<OrderHistoryResponseDto> findOrderHistory(
+    List<OrderHistoryProjection> findOrderHistory(
             @Param("status") OrderStatus status,
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate
     );
+
 
 
 

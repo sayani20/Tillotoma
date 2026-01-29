@@ -13,12 +13,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class OrderHistoryResponseDto {
 
+   /* private Long orderId;
+    private String orderNumber;
+    private LocalDate orderDate;
+    private LocalDate requiredBy;
+    private Long noOfItems;
+    private Double totalAmount;
+    private String remarks;
+    private OrderStatus status;
+    private LocalDate approvedOn;
+    private String vendorName;
+    private String challanNumber;
+    private LocalDateTime receivedOn;
+    private String orderReceivedType;
+    private Double paidAmount;*/
+
     private Long orderId;
     private String orderNumber;
     private LocalDate orderDate;
     private LocalDate requiredBy;
     private Long noOfItems;
     private Double totalAmount;
+    private Double paidAmount;
     private String remarks;
     private OrderStatus status;
     private LocalDate approvedOn;

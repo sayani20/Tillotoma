@@ -93,7 +93,7 @@ public class VendorOrderController {
         }
     }
 
-    @GetMapping("/orderHistory")
+   /* @GetMapping("/orderHistory")
     public ResponseEntity<ApiResponse<List<OrderHistoryResponseDto>>> getOrderHistory(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -112,6 +112,25 @@ public class VendorOrderController {
                         true,
                         "Order history fetched successfully",
                         list
+                )
+        );
+    }*/
+
+    @GetMapping("/orderHistory")
+    public ResponseEntity<ApiResponse<List<OrderHistoryResponseDto>>> getOrderHistory(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    ) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Order history fetched successfully",
+                        orderService.getOrderHistory(fromDate, toDate)
                 )
         );
     }

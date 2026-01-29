@@ -40,6 +40,9 @@ public class VendorOrderReceive {
 
     // 🗓️ Receive time
     private LocalDateTime receivedOn;
+
+    private String remarks;
+
     @Column(name = "order_received_type")
     private String orderReceivedType;
 }

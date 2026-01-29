@@ -1,9 +1,6 @@
 package com.web.tilotoma.serviceimpl;
 
-import com.web.tilotoma.dto.MaterialReceiveRequestDto;
-import com.web.tilotoma.dto.MaterialReceiveResponseDto;
-import com.web.tilotoma.dto.VendorOrderReceiveDto;
-import com.web.tilotoma.dto.VendorOrderReceiveResponseDto;
+import com.web.tilotoma.dto.*;
 import com.web.tilotoma.entity.material.*;
 import com.web.tilotoma.repository.*;
 import com.web.tilotoma.service.VendorOrderReceiveService;
@@ -75,6 +72,7 @@ public class VendorOrderReceiveServiceImpl
                     .receivedAmount(amount)
                     .challanNumber(request.getChallanNumber())
                     .orderReceivedType(request.getOrderReceivedType())
+                    .remarks(request.getRemarks())
                     .receivedOn(LocalDateTime.now())
                     .build();
 
@@ -229,6 +227,34 @@ public class VendorOrderReceiveServiceImpl
                 fromDateTime,
                 toDateTime
         );
+    }
+
+    @Override
+    public List<ReceiveResponseDto> getReceives(
+            Long materialId,
+            LocalDate fromDate,
+            LocalDate toDate
+    ) {
+
+        LocalDateTime start = fromDate.atStartOfDay();
+        LocalDateTime end = toDate.atTime(23, 59, 59);
+
+        return receiveRepository
+                .findByMaterial_IdAndReceivedOnBetween(materialId, start, end)
+                .stream()
+                .map(r -> new ReceiveResponseDto(
+                        r.getReceivedOn().toLocalDate(),
+
+                        r.getVendorOrder().getVendor().getId(),
+                        r.getVendorOrder().getVendor().getVendorName(),
+
+                        r.getMaterial().getId(),
+                        r.getMaterial().getMaterialName(),
+
+                        r.getReceivedQuantity(),
+                        r.getChallanNumber()
+                ))
+                .toList();
     }
 
 }

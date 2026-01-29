@@ -1,6 +1,7 @@
 package com.web.tilotoma.controller;
 
 import com.web.tilotoma.dto.*;
+import com.web.tilotoma.entity.material.VendorOrderReceive;
 import com.web.tilotoma.service.VendorOrderReceiveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -103,5 +105,21 @@ public class VendorOrderReceiveController {
                         list
                 )
         );
+    }
+
+
+    @GetMapping("/receivedList")
+    public List<ReceiveResponseDto> getByMaterialAndDate(
+            @RequestParam Long materialId,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    ) {
+        return receiveService.getReceives(materialId, fromDate, toDate);
     }
 }

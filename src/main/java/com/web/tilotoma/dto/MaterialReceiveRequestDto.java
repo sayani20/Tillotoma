@@ -24,5 +24,6 @@ public class MaterialReceiveRequestDto {
         private Double rate;
     }
     private String orderReceivedType;
+    private String remarks;
 
 }

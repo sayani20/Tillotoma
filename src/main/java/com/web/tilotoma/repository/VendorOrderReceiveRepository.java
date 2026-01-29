@@ -21,6 +21,12 @@ public interface VendorOrderReceiveRepository extends JpaRepository<VendorOrderR
 
     List<StockLedger> findByMaterial_Id(Long materialId);
 
+    List<VendorOrderReceive> findByMaterial_IdAndReceivedOnBetween(
+            Long materialId,
+            LocalDateTime fromDate,
+            LocalDateTime toDate
+    );
+
 
    /* @Query("""
         SELECT new com.web.tilotoma.dto.VendorOrderReceiveResponseDto(
